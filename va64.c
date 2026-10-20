@@ -1,13 +1,8 @@
 #include <stdio.h>
-
 #include "a64.h"
 #include "va64.h"
 
 int main() {
-  printf("nop: 0x%08X\n", a64_nop());
-  printf("fn: 0x%08X\n", va64_fn(3, 0));
-  printf("fn_op: 0x%08X\n", va64_op(va64_fn(3, 1)));
-  printf("fn_arity: 0x%08X\n", va64_fn_arity(va64_fn(3, 1)));
-  printf("fn_ret: 0x%08X\n", va64_fn_ret(va64_fn(3, 1)));
+  printf("Usage: va64 <file.a64> <file.va64> arg ...\n");
   return 0;
 }
