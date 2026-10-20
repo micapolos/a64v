@@ -2,20 +2,24 @@
 
 #include <stdint.h>
 
-typedef uint32_t va64;
+typedef uint32_t va64_t;
 
-static inline va64 va64_fn(int arity, int ret) {
-  return (0b000001 << 26) | (arity << 23) | (ret << 22);
+enum Va64Op {
+  VA64_OP_FN = 0x1,
+};
+
+static inline va64_t va64_fn(int arity, int ret) {
+  return (VA64_OP_FN << 26) | (arity << 23) | (ret << 22);
 }
 
-static inline int va64_op(va64 v) {
-  return v >>> 26;
+static inline int va64_op(va64_t va64) {
+  return va64 >> 26;
 }
 
-static inline int va64_fn_arity(va64 v) {
-  return (v >>> 23) & 0b111;
+static inline int va64_fn_arity(va64_t va64) {
+  return (va64 >> 23) & 0b111;
 }
 
-static inline int va64_fn_ret(va64 v) {
-  return (v >>> 22) & 0b1;
+static inline int va64_fn_ret(va64_t va64) {
+  return (va64 >> 22) & 0b1;
 }
