@@ -4,12 +4,10 @@
 
 typedef uint32_t va64_t;
 
-enum Va64Op {
-  VA64_OP_FN = 0x1,
-};
+static const int va64_op_fn = 0x1;
 
 static inline va64_t va64_fn(int arity, int ret) {
-  return (VA64_OP_FN << 26) | (arity << 23) | (ret << 22);
+  return (va64_op_fn << 26) | (arity << 23) | (ret << 22);
 }
 
 static inline int va64_op(va64_t va64) {
