@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
 ./build
-built/va64 "$@"
+built/a64v "$@"

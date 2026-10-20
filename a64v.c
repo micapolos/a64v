@@ -3,10 +3,11 @@
 
 #include "a64.h"
 #include "va64.h"
+#include "a64v.h"
 
 int main(int argc, char *argv[]) {
   if (argc < 3) {
-    printf("Usage: va64 <file.a64> <file.va64> arg ...\n");
+    printf("Usage: %s <file.a64> <file.va64> arg ...\n", argv[0]);
     return 1;
   }
 
