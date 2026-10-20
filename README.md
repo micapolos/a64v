@@ -1,2 +1,2 @@
 # a64v
-AArch64 verifier.
+AArch64 machine code verifier.
