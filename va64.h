@@ -14,6 +14,10 @@ static inline int va64_op(va64_t va64) {
   return va64 >> 26;
 }
 
+static inline int va64_is_fn(va64_t va64) {
+  return va64_op(va64) == va64_op_fn;
+}
+
 static inline int va64_fn_arity(va64_t va64) {
   return (va64 >> 23) & 0b111;
 }
