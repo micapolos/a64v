@@ -26,11 +26,13 @@ int main(int argc, char *argv[]) {
 
       unsigned a64_offset = 0;
       while (a64_ptr != a64_end) {
-        if (va64_ptr != va64_end) {
+        while (va64_ptr != va64_end) {
           unsigned va64_op = *va64_ptr;
           if (va64_get_tag(va64_op) == VA64_TAG_STEP) {
             a64_offset += va64_get_step_offset(va64_op);
             va64_ptr++;
+          } else {
+            break;
           }
         }
 
