@@ -16,13 +16,13 @@ int main() {
   {
     a64_validator_init(&validator);
     a64_validator_emit_a64(&validator, A64_NOP);
-    //assert(validator.tag == a64_validator_tag_error);
+    assert(validator.tag == a64_validator_tag_error);
   }
 
   {
     a64_validator_init(&validator);
     a64_validator_emit_va64(&validator, VA64_STEP(0));
-    //assert(validator.tag == a64_validator_tag_error);
+    assert(validator.tag == a64_validator_tag_error);
   }
 
   return 0;
