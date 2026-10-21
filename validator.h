@@ -19,9 +19,11 @@ static inline bool a64_validator_is_error(a64_validator *validator) {
 
 void a64_validator_init(a64_validator *);
 
+// emit individual ops
 void a64_validator_emit_a64(a64_validator *, a64);
 void a64_validator_emit_va64(a64_validator *, va64);
 
+// emit complete a64 and va64 ops
 void a64_validator_emit(
   a64_validator *validator,
   const a64 *a64_ops, size_t a64_size,
