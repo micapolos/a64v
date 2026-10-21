@@ -7,14 +7,13 @@
 
 int main() {
   static const a64 a64_code[] = {
-    a64_nop(),
-    a64_nop(),
-    a64_nop(),
-    a64_ret(),
+    A64_NOP,
+    A64_NOP,
+    A64_RET,
   };
 
   static const va64 va64_code[] = {
-    va64_fn(3, 1),
+    VA64_FN(3, 1),
   };
 
   a64v_state state;

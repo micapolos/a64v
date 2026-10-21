@@ -4,13 +4,22 @@
 
 typedef uint32_t va64;
 
-#define va64_tag_ofs 0
-#define va64_tag_fn 1
+typedef enum {
+  VA64_TAG_OFS = 0,
+  VA64_TAG_FN = 1,
+} va64_tag;
 
-#define va64_ofs(n) ((va64_tag_ofs << 26) | n)
-#define va64_fn(arity, ret) ((va64_tag_fn << 26) | (arity << 23) | (ret << 22))
-#define va64_tag(op) ((op) >> 26)
-#define va64_is_fn(op) (va64_tag(op) == va64_tag_fn)
-#define va64_fn_arity(op) (((op) >> 23) & 0b111)
-#define va64_fn_ret(op) (((op) >> 22) & 0b1)
+#define VA64_OFS(n) ((VA64_TAG_OFS << 26) | n)
+#define VA64_FN(arity, ret) ((VA64_TAG_FN << 26) | (arity << 23) | (ret << 22))
 
+static inline unsigned va64_get_tag(va64 op) {
+  return op >> 26;
+}
+
+static inline unsigned va64_get_fn_arity(va64 op) {
+  return (op >> 23) & 0b111;
+}
+
+static inline unsigned va64_get_fn_ret(va64 op) {
+  return (op >> 22) & 0b1;
+}

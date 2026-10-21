@@ -4,11 +4,10 @@
 
 int main() {
   {
-    va64 op = va64_fn(3, 1);
-    assert(va64_tag(op) == va64_tag_fn);
-    assert(va64_is_fn(op));
-    assert(va64_fn_arity(op) == 3);
-    assert(va64_fn_ret(op) == 1);
+    va64 op = VA64_FN(3, 1);
+    assert(va64_get_tag(op) == VA64_TAG_FN);
+    assert(va64_get_fn_arity(op) == 3);
+    assert(va64_get_fn_ret(op) == 1);
   }
   return 0;
 }
