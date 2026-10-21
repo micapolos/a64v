@@ -5,27 +5,15 @@
 #include "va64.h"
 #include "a64v.h"
 
-int main(int argc, char *argv[]) {
-  if (argc < 3) {
-    printf("Usage: %s <file.a64> <file.va64> arg ...\n", argv[0]);
-    return 1;
-  }
-
-  FILE *a64file = fopen(argv[1], "rb");
-  if (a64file == NULL) {
-    printf("Could not open %s", argv[1]);
-    return 1;
-  }
-
-  FILE *va64file = fopen(argv[2], "rb");
-  if (va64file == NULL) {
-    printf("Could not open %s", argv[2]);
-    fclose(a64file);
-    return 1;
-  }
-
-  fclose(va64file);
-  fclose(a64file);
-
-  return 0;
+void a64v_state_init(
+    a64v_state *state,
+    a64* a64_data, unsigned a64_count,
+    va64* va64_data, unsigned va64_count) {
+  printf("Init: %p, %d\n", a64_data, a64_count);
+  printf("Init: %p, %d\n", va64_data, va64_count);
+  state->a64_ptr = a64_data;
+  state->a64_end = a64_data + a64_count;
+  state->va64_ptr = va64_data;
+  state->va64_end = va64_data + va64_count;
+  state->tag = a64v_state_tag_start;
 }
