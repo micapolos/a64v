@@ -17,7 +17,30 @@ int main(int argc, char *argv[]) {
     a64v_with_file_data(argv[2], ^(const void *va64_data, size_t va64_size) {
       a64_verifier verifier;
       a64_verifier_init(&verifier);
-      printf("%p, %zu, %p, %zu", a64_data, a64_size, va64_data, va64_size);
+
+      a64* a64_ptr = (a64*)a64_data;
+      a64* a64_end = a64_ptr + (a64_size >> 2);
+
+      va64* va64_ptr = (va64*)va64_data;
+      va64* va64_end = a64_ptr + (va64_size >> 2);
+
+      unsigned a64_offset = 0;
+      while (a64_ptr != a64_end) {
+        if (va64_ptr != va64_end) {
+          unsigned va64_op = *va64_ptr;
+          if (va64_get_tag(va64_op) == VA64_TAG_STEP) {
+            a64_offset += va64_get_step_offset(va64_op);
+            va64_ptr++;
+          }
+        }
+
+        if (a64_offset != 0) {
+          a64_offset--;
+          a64 a64_op = *a64_ptr;
+          a64_verifier_emit_a64(&verifier, a64_op);
+          a64_ptr++;
+        }
+      }
     });
   });
 

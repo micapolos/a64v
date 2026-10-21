@@ -21,7 +21,7 @@ int main() {
 
   {
     a64_verifier_init(&verifier);
-    a64_verifier_emit_va64(&verifier, VA64_OFS(0));
+    a64_verifier_emit_va64(&verifier, VA64_STEP(0));
     assert(verifier.tag == a64_verifier_tag_error);
   }
 
