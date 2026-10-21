@@ -3,47 +3,47 @@
 #include "validator.h"
 
 void a64_validator_init(a64_validator *validator) {
-  validator->tag = a64_validator_tag_init;
+  validator->tag = A64_VALIDATOR_TAG_INIT;
 }
 
 void a64_validator_emit_a64(a64_validator * validator, a64 op) {
   switch (validator->tag) {
-  case a64_validator_tag_error:
+  case A64_VALIDATOR_TAG_ERROR:
     break;
-  case a64_validator_tag_fn:
+  case A64_VALIDATOR_TAG_FN:
     if (a64_is_nop(op)) {
       // Nothing to update
     } else if (a64_is_ret(op)) {
-      validator->tag = a64_validator_tag_init;
+      validator->tag = A64_VALIDATOR_TAG_INIT;
     } else {
-      validator->tag = a64_validator_tag_error;
+      validator->tag = A64_VALIDATOR_TAG_ERROR;
     }
     break;
   default:
-    validator->tag = a64_validator_tag_error;
+    validator->tag = A64_VALIDATOR_TAG_ERROR;
   }
 }
 
 void a64_validator_emit_va64(a64_validator *validator, va64 op) {
   switch (validator->tag) {
-  case a64_validator_tag_error:
+  case A64_VALIDATOR_TAG_ERROR:
     break;
-  case a64_validator_tag_init:
+  case A64_VALIDATOR_TAG_INIT:
     switch (va64_get_tag(op)) {
     case VA64_TAG_FN:
       if (va64_get_fn_arity(op) != 0) {
-        validator->tag = a64_validator_tag_error;
+        validator->tag = A64_VALIDATOR_TAG_ERROR;
       } else if (va64_get_fn_arity(op) != 0) {
-        validator->tag = a64_validator_tag_error;
+        validator->tag = A64_VALIDATOR_TAG_ERROR;
       } else {
-        validator->tag = a64_validator_tag_fn;
+        validator->tag = A64_VALIDATOR_TAG_FN;
       }
       break;
     default:
-      validator->tag = a64_validator_tag_error;
+      validator->tag = A64_VALIDATOR_TAG_ERROR;
     }
   default:
-    validator->tag = a64_validator_tag_error;
+    validator->tag = A64_VALIDATOR_TAG_ERROR;
   }
 }
 

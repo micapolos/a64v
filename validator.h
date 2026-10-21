@@ -4,9 +4,9 @@
 #include "va64.h"
 
 typedef enum : unsigned {
-  a64_validator_tag_init = 0x0,
-  a64_validator_tag_fn = 0x1,
-  a64_validator_tag_error = 0xff,
+  A64_VALIDATOR_TAG_INIT = 0x0,
+  A64_VALIDATOR_TAG_FN = 0x1,
+  A64_VALIDATOR_TAG_ERROR = 0xff,
 } a64_validator_tag;
 
 typedef struct {
@@ -14,7 +14,7 @@ typedef struct {
 } a64_validator;
 
 static inline bool a64_validator_is_error(a64_validator *validator) {
-  return validator->tag == a64_validator_tag_error;
+  return validator->tag == A64_VALIDATOR_TAG_ERROR;
 }
 
 void a64_validator_init(a64_validator *);
