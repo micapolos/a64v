@@ -3,7 +3,7 @@
 
 #include "a64.h"
 #include "va64.h"
-#include "a64_verifier.h"
+#include "verifier.h"
 
 int main() {
   a64_verifier verifier;

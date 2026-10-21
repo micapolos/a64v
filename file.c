@@ -7,7 +7,7 @@
 
 #include "file.h"
 
-void a64v_with_file_data(const char *filename, a64v_data_callback_t data_callback) {
+void a64v_with_file_data(const char *filename, a64v_file_data_callback_t data_callback) {
   int fd = open(filename, O_RDONLY);
   if (fd == -1) {
     perror("Failed to open file");

@@ -1,4 +1,4 @@
-#import "a64_verifier.h"
+#import "verifier.h"
 
 void a64_verifier_init(a64_verifier *verifier) {
   verifier->tag = a64_verifier_tag_init;
