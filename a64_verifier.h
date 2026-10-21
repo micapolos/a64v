@@ -13,6 +13,10 @@ typedef struct {
   a64_verifier_tag tag;
 } a64_verifier;
 
+static inline bool a64_verifier_is_error(a64_verifier *verifier) {
+  return verifier->tag == a64_verifier_tag_error;
+}
+
 void a64_verifier_init(a64_verifier *);
 void a64_verifier_emit_a64(a64_verifier *, a64);
 void a64_verifier_emit_va64(a64_verifier *, va64);

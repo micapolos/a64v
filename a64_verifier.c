@@ -5,7 +5,7 @@ void a64_verifier_init(a64_verifier *verifier) {
 }
 
 void a64_verifier_emit_a64(a64_verifier * verifier, a64) {
-  if (verifier->tag == a64_verifier_tag_error) return;
+  if (a64_verifier_is_error(verifier)) return;
   verifier->tag = a64_verifier_tag_error;
 }
 
