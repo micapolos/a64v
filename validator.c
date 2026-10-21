@@ -3,6 +3,7 @@
 #include "validator.h"
 
 void a64_validator_init(a64_validator *validator) {
+  validator->fn_decl_count = 0;
   validator->tag = A64_VALIDATOR_TAG_INIT;
 }
 
