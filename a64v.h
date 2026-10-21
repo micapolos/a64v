@@ -19,8 +19,8 @@ typedef struct {
 
 void a64v_state_init(
   a64v_state *state,
-  a64* a64_data, unsigned a64_count,
-  va64* va64_data, unsigned va64_count);
+  const a64* a64_data, unsigned a64_count,
+  const va64* va64_data, unsigned va64_count);
 
 bool a64v_emit_a64(a64v_state *, a64);
 bool a64v_emit_va64(a64v_state *, va64);

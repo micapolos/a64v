@@ -7,13 +7,11 @@
 
 void a64v_state_init(
     a64v_state *state,
-    a64* a64_data, unsigned a64_count,
-    va64* va64_data, unsigned va64_count) {
-  printf("Init: %p, %d\n", a64_data, a64_count);
-  printf("Init: %p, %d\n", va64_data, va64_count);
-  state->a64_ptr = a64_data;
-  state->a64_end = a64_data + a64_count;
-  state->va64_ptr = va64_data;
-  state->va64_end = va64_data + va64_count;
+    const a64* a64_data, unsigned a64_count,
+    const va64* va64_data, unsigned va64_count) {
+  state->a64_ptr = (a64*) a64_data;
+  state->a64_end = (a64*) a64_data + a64_count;
+  state->va64_ptr = (va64*) va64_data;
+  state->va64_end = (va64*) va64_data + va64_count;
   state->tag = a64v_state_tag_start;
 }
