@@ -1,6 +1,0 @@
-#!/bin/bash
-set -e
-./build
-built/a64_test
-built/va64_test
-built/validator_test
