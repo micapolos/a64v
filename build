@@ -6,5 +6,5 @@ FLAGS="-std=c23 -Wall -Wextra -Wpadded -Werror=padded"
 mkdir -p built
 clang $FLAGS a64_test.c -o built/a64_test
 clang $FLAGS va64_test.c -o built/va64_test
-clang $FLAGS emitter.c emitter_test.c -o built/emitter_test
-clang $FLAGS file.c emitter.c a64v.c -o built/a64v
+clang $FLAGS validator.c validator_test.c -o built/validator_test
+clang $FLAGS file.c validator.c a64v.c -o built/a64v
