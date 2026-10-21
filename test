@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
-./build
+mkdir -p built
+clang -std=c23 a64_test.c -o built/a64_test
+clang -std=c23 va64_test.c -o built/va64_test
 built/a64_test
 built/va64_test

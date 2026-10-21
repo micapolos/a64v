@@ -1,4 +1,5 @@
 #!/bin/bash
 set -e
-./build
+mkdir -p built
+clang -std=c23 a64v.c -o built/a64v
 built/a64v "$@"
