@@ -3,4 +3,4 @@ set -e
 ./build
 built/a64_test
 built/va64_test
-built/a64v_test
+built/a64_verifier_test

@@ -14,6 +14,5 @@ typedef struct {
 } a64_verifier;
 
 void a64_verifier_init(a64_verifier *);
-
 void a64_verifier_emit_a64(a64_verifier *, a64);
 void a64_verifier_emit_va64(a64_verifier *, va64);

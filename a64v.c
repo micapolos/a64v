@@ -3,15 +3,23 @@
 
 #include "a64.h"
 #include "va64.h"
-#include "a64v.h"
+#include "a64_verifier.h"
+#include "data.h"
+#include "file.h"
 
-void a64v_state_init(
-    a64v_state *state,
-    const a64* a64_data, unsigned a64_count,
-    const va64* va64_data, unsigned va64_count) {
-  state->a64_ptr = (a64*) a64_data;
-  state->a64_end = (a64*) a64_data + a64_count;
-  state->va64_ptr = (va64*) va64_data;
-  state->va64_end = (va64*) va64_data + va64_count;
-  state->tag = a64v_state_tag_start;
+int main(int argc, char *argv[]) {
+  if (argc < 3) {
+    printf("Usage: %s <file.a64> <file.va64> arg ...\n", argv[0]);
+    return 1;
+  }
+
+  a64v_with_file_data(argv[1], ^(const void *a64_data, size_t a64_size) {
+    a64v_with_file_data(argv[2], ^(const void *va64_data, size_t va64_size) {
+      a64_verifier verifier;
+      a64_verifier_init(&verifier);
+      printf("%p, %zu, %p, %zu", a64_data, a64_size, va64_data, va64_size);
+    });
+  });
+
+  return 0;
 }
