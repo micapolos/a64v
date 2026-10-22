@@ -15,6 +15,7 @@ macro_rules! reg {
 macro_rules! a64 {
   (nop) => (0b11010101000000110010000000011111_u32);
   (ret_r $reg:tt) => ($crate::op!(22 0b1101011001011111000000, 5 reg!($reg), 5 0b00000));
+  (add_r $r1:tt, $r2:tt, $r3:tt) => ($crate::op!(11 0b10001011000, 5 reg!($r3), 6 0, 5 reg!($r2), 5 reg!($r1)));
   (ret) => (a64!(ret_r x30));
 }
 
@@ -30,5 +31,6 @@ mod tests {
     assert!(a64!(nop) != 0);
     assert!(a64!(ret_r x30) != 0);
     assert_eq!(a64!(ret), a64!(ret_r x30));
+    assert_ne!(a64!(add_r x0, x0, x1), 0);
   }
 }
