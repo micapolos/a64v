@@ -26,7 +26,7 @@ pub fn main() {
   }
 
   let code = asm64! {
-    add_r(x0, x0, x1)
+    sub_r(x0, x0, x1)
     ret()
   };
 
@@ -52,9 +52,9 @@ pub fn main() {
 
   type U64Op2 = unsafe extern "C" fn(u64, u64) -> u64;
 
-  let arm_add: U64Op2 = unsafe { std::mem::transmute(ptr) };
+  let arm_sub: U64Op2 = unsafe { std::mem::transmute(ptr) };
 
-  let result = unsafe { arm_add(10, 20) };
+  let result = unsafe { arm_sub(50, 40) };
 
   println!("{}", result);
 

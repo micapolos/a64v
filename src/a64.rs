@@ -35,6 +35,15 @@ macro_rules! a64 {
       5 reg!($r1),
     )
   };
+  (sub_r($r1:tt, $r2:tt, $r3:tt)) => {
+    $crate::op!(
+      11 0b11001011000,
+      5 reg!($r3),
+      6 0,
+      5 reg!($r2),
+      5 reg!($r1),
+    )
+  };
 }
 
 #[macro_export]
