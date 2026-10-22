@@ -26,7 +26,7 @@ pub fn main() {
   }
 
   let code = [
-    a64!(add_r x0, x0, x1),
+    a64!(add_r(x0, x0, x1)),
     a64!(ret),
   ];
 
