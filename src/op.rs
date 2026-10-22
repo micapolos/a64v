@@ -1,15 +1,15 @@
 #[macro_export]
 macro_rules! op {
-  ($($width:literal $val:expr),+) => {
+  ($($width:literal $val:expr),+ $(,)?) => {
     {
-      let mut acc: u32 = 0;
+      let mut acc = 0;
       $(
         let width = $width;
         let val = $val;
         let mask = (1 << width) - 1;
         acc = (acc << width) | (val & mask);
       )*
-      acc
+      acc as u32
     }
   };
 }
