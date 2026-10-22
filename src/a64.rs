@@ -19,6 +19,17 @@ macro_rules! a64 {
   (ret) => (a64!(ret_r x30));
 }
 
+#[macro_export]
+macro_rules! asm64 {
+  ($( $op:ident $( $arg:tt ),* );* $(;)?) => {
+    [
+      $(
+        $crate::a64!($op $( $arg ),*)
+      ),*
+    ]
+  };
+}
+
 #[cfg(test)]
 mod tests {
   #[test]
@@ -32,5 +43,14 @@ mod tests {
     assert!(a64!(ret_r x30) != 0);
     assert_eq!(a64!(ret), a64!(ret_r x30));
     assert_ne!(a64!(add_r x0, x0, x1), 0);
+  }
+
+  #[test]
+  fn test_asm64() {
+    let code = asm64!(
+      add_r x0, x0, x1;
+      add_r x0, x0, x1;
+    );
+    println!("{}", code[0]);
   }
 }
