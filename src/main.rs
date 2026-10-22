@@ -9,6 +9,7 @@ extern "C" {
 
 pub fn main() {
   let size = 4096;
+
   let ptr = unsafe {
     libc::mmap(
       ptr::null_mut(),
@@ -24,7 +25,7 @@ pub fn main() {
     panic!("mmap failed!");
   }
 
-  let code: [u32; 2] = [
+  let code = [
     a64!(add_r x0, x0, x1),
     a64!(ret),
   ];
@@ -49,10 +50,11 @@ pub fn main() {
     sys_icache_invalidate(ptr, size);
   }
 
-  type JitFunc = unsafe extern "C" fn(u64, u64) -> u64;
-  let func: JitFunc = unsafe { std::mem::transmute(ptr) };
+  type U64Op2 = unsafe extern "C" fn(u64, u64) -> u64;
 
-  let result = unsafe { func(10, 20) };
+  let arm_add: U64Op2 = unsafe { std::mem::transmute(ptr) };
+
+  let result = unsafe { arm_add(10, 20) };
 
   println!("{}", result);
 
