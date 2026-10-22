@@ -3,15 +3,15 @@
 
 #[link(name = "System")]
 extern "C" {
-    fn write(fd: i32, cbuf: *const u8, nbyte: usize) -> isize;
+  fn write(fd: i32, cbuf: *const u8, nbyte: usize) -> isize;
 }
 
 #[no_mangle]
 pub extern "C" fn main() -> i32 {
   unsafe {
     write(1, b"!\n".as_ptr(), 2);
-    0
   }
+  0
 }
 
 #[panic_handler]
