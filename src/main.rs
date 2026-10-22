@@ -25,10 +25,10 @@ pub fn main() {
     panic!("mmap failed!");
   }
 
-  let code = [
-    a64!(add_r(x0, x0, x1)),
-    a64!(ret()),
-  ];
+  let code = asm64! {
+    add_r(x0, x0, x1);
+    ret();
+  };
 
   unsafe {
     ptr::copy_nonoverlapping(

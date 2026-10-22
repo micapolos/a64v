@@ -68,6 +68,7 @@ mod tests {
     let code = asm64!(
       add_r(x0, x0, x1);
       add_r(x0, x0, x1);
+      ret();
     );
     println!("{}", code[0]);
   }
