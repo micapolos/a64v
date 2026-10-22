@@ -13,10 +13,10 @@ macro_rules! reg {
 
 #[macro_export]
 macro_rules! a64 {
-  (nop) => {
+  (nop()) => {
     0b11010101000000110010000000011111_u32
   };
-  (ret) => {
+  (ret()) => {
     a64!(ret_r(x30))
   };
   (ret_r($reg:tt)) => {
@@ -57,9 +57,9 @@ mod tests {
 
   #[test]
   fn test_a64() {
-    assert!(a64!(nop) != 0);
+    assert!(a64!(nop()) != 0);
     assert!(a64!(ret_r(x30)) != 0);
-    assert_eq!(a64!(ret), a64!(ret_r(x30)));
+    assert_eq!(a64!(ret()), a64!(ret_r(x30)));
     assert_ne!(a64!(add_r(x0, x0, x1)), 0);
   }
 
