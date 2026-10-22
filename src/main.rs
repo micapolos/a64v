@@ -10,7 +10,6 @@ extern "C" {
 #[no_mangle]
 pub extern "C" fn main(_argc: i32, _argv: *const *const u8) -> i32 {
   unsafe {
-    // File descriptor 1 is stdout
     write(1, b"!\n".as_ptr(), 2);
     _exit(0);
   }
