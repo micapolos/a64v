@@ -39,7 +39,7 @@ macro_rules! a64 {
 
 #[macro_export]
 macro_rules! asm64 {
-  ($( $op:ident $( $arg:tt ),* );* $(;)?) => {
+  ($( $op:ident $( $arg:tt ),* )*) => {
     [
       $(
         $crate::a64!($op $( $arg ),*)
@@ -66,9 +66,9 @@ mod tests {
   #[test]
   fn test_asm64() {
     let code = asm64!(
-      add_r(x0, x0, x1);
-      add_r(x0, x0, x1);
-      ret();
+      add_r(x0, x0, x1)
+      add_r(x0, x0, x1)
+      ret()
     );
     println!("{}", code[0]);
   }

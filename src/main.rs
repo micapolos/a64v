@@ -26,8 +26,8 @@ pub fn main() {
   }
 
   let code = asm64! {
-    add_r(x0, x0, x1);
-    ret();
+    add_r(x0, x0, x1)
+    ret()
   };
 
   unsafe {
