@@ -51,12 +51,12 @@ impl Jit {
 
   pub fn as_slice(&mut self) -> &mut [u32] {
     unsafe {
-      return std::slice::from_raw_parts_mut(self.ptr as *mut u32, self.size / size_of::<u32>());
+      std::slice::from_raw_parts_mut(self.ptr as *mut u32, self.size / size_of::<u32>())
     }
   }
 
   pub fn copy_from_slice(&mut self, slice: &[u32]) {
-    self.as_slice()[..slice.len()].copy_from_slice(&slice);
+    self.as_slice()[..slice.len()].copy_from_slice(slice);
   }
 }
 
