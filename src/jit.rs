@@ -1,4 +1,3 @@
-use std::io;
 use std::ptr;
 
 extern "C" {
@@ -11,7 +10,7 @@ pub struct Jit {
 }
 
 impl Jit {
-  pub fn new(size: usize) -> io::Result<Self> {
+  pub fn new(size: usize) -> Option<Self> {
     let ptr = unsafe {
       libc::mmap(
         ptr::null_mut(),
@@ -24,16 +23,16 @@ impl Jit {
     };
 
     if ptr == libc::MAP_FAILED {
-      return Err(io::Error::last_os_error());
+      return None;
     }
 
-    Ok(Self {
+    Some(Self {
       ptr: ptr as *mut u8,
       size,
     })
   }
 
-  pub fn set_exec(&mut self) -> io::Result<()> {
+  pub fn set_exec(&mut self) -> Option<()> {
     let res = unsafe {
       libc::mprotect(
         self.ptr as *mut libc::c_void,
@@ -43,18 +42,23 @@ impl Jit {
     };
 
     if res != 0 {
-      return Err(io::Error::last_os_error());
+      return None;
     }
 
     unsafe {
       sys_icache_invalidate(self.ptr as *mut libc::c_void, self.size);
     }
 
-    Ok(())
+    Some(())
   }
 
   pub fn as_slice(&mut self) -> &mut [u32] {
-    unsafe { std::slice::from_raw_parts_mut(self.ptr as *mut u32, self.size) }
+    unsafe {
+      return std::slice::from_raw_parts_mut(
+        self.ptr as *mut u32,
+        self.size / std::mem::size_of::<u32>(),
+      );
+    }
   }
 
   pub fn copy_from_slice(&mut self, slice: &[u32]) {

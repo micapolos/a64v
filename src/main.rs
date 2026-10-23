@@ -1,7 +1,7 @@
-mod op;
 mod a64;
 mod asm;
 mod jit;
+mod op;
 
 use jit::Jit;
 
