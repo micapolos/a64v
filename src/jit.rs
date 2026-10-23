@@ -32,7 +32,7 @@ impl Jit {
     })
   }
 
-  pub fn set_exec(&mut self) -> Option<()> {
+  pub fn set_executable(&mut self) -> Option<()> {
     unsafe {
       mprotect(
         self.ptr as *mut c_void,
@@ -83,7 +83,7 @@ mod tests {
 
     let mut jit = Jit::new(4096).unwrap();
     jit.copy_from_slice(&asm);
-    jit.set_exec().unwrap();
+    jit.set_executable().unwrap();
 
     type U64Op2 = unsafe extern "C" fn(u64, u64) -> u64;
     let fun: U64Op2 = unsafe { transmute(jit.ptr) };

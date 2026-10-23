@@ -16,7 +16,7 @@ pub fn main() {
 
   jit.copy_from_slice(&asm);
 
-  jit.set_exec().unwrap();
+  jit.set_executable().unwrap();
 
   type U64Op2 = unsafe extern "C" fn(u64, u64) -> u64;
 
