@@ -1,8 +1,7 @@
-use crate::asm;
 use rustix::mm::{mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags};
 use std::{
   ffi::c_void,
-  mem::{size_of, transmute},
+  mem::size_of,
   ptr::null_mut,
 };
 
@@ -72,6 +71,8 @@ impl Drop for Jit {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::asm;
+  use std::mem::transmute;
 
   #[test]
   fn test_jit() {
