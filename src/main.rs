@@ -2,6 +2,7 @@ use std::ptr;
 
 mod op;
 mod a64;
+mod asm;
 
 extern "C" {
   fn sys_icache_invalidate(addr: *mut std::ffi::c_void, len: usize);
@@ -25,7 +26,7 @@ pub fn main() {
     panic!("mmap failed!");
   }
 
-  let code = asm64! {
+  let code = asm! {
     sub_r(x0, x0, x1)
     ret()
   };
