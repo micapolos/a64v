@@ -1,64 +1,27 @@
-use std::ptr;
-
+mod op;
 mod a64;
 mod asm;
 mod jit;
-mod op;
 
-extern "C" {
-  fn sys_icache_invalidate(addr: *mut std::ffi::c_void, len: usize);
-}
+use jit::Jit;
 
 pub fn main() {
-  let size = 4096;
+  let mut jit = Jit::new(4096).unwrap();
 
-  let ptr = unsafe {
-    libc::mmap(
-      ptr::null_mut(),
-      size,
-      libc::PROT_READ | libc::PROT_WRITE,
-      libc::MAP_ANON | libc::MAP_PRIVATE,
-      -1,
-      0,
-    )
-  };
-
-  if ptr == libc::MAP_FAILED {
-    panic!("mmap failed!");
-  }
-
-  let code = asm! {
+  let asm = asm! {
     sub_r(x0, x0, x1);
     ret();
   };
 
-  unsafe {
-    ptr::copy_nonoverlapping(
-      code.as_ptr() as *const u8,
-      ptr as *mut u8,
-      code.len() * std::mem::size_of::<u32>(),
-    );
-  }
+  jit.copy_from_slice(&asm);
 
-  let protect_res = unsafe { libc::mprotect(ptr, size, libc::PROT_READ | libc::PROT_EXEC) };
-
-  if protect_res != 0 {
-    panic!("mprotect failed to make memory executable!");
-  }
-
-  unsafe {
-    sys_icache_invalidate(ptr, size);
-  }
+  jit.set_exec().unwrap();
 
   type U64Op2 = unsafe extern "C" fn(u64, u64) -> u64;
 
-  let arm_sub: U64Op2 = unsafe { std::mem::transmute(ptr) };
+  let fun: U64Op2 = unsafe { std::mem::transmute(jit.ptr) };
 
-  let result = unsafe { arm_sub(50, 40) };
+  let result = unsafe { fun(50, 40) };
 
   println!("{}", result);
-
-  unsafe {
-    libc::munmap(ptr, size);
-  }
 }
