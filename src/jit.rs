@@ -1,52 +1,50 @@
-use std::ptr;
+use crate::asm;
+use rustix::mm::{mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags};
+use std::{
+  ffi::c_void,
+  mem::{size_of, transmute},
+  ptr::null_mut,
+};
 
 extern "C" {
-  fn sys_icache_invalidate(addr: *mut std::ffi::c_void, len: usize);
+  fn sys_icache_invalidate(addr: *mut c_void, len: usize);
 }
 
 pub struct Jit {
-  pub ptr: *mut std::ffi::c_void,
+  pub ptr: *mut u8,
   pub size: usize,
 }
 
 impl Jit {
   pub fn new(size: usize) -> Option<Self> {
     let ptr = unsafe {
-      libc::mmap(
-        ptr::null_mut(),
+      mmap_anonymous(
+        null_mut(),
         size,
-        libc::PROT_READ | libc::PROT_WRITE,
-        libc::MAP_ANON | libc::MAP_PRIVATE,
-        -1,
-        0,
+        ProtFlags::READ | ProtFlags::WRITE,
+        MapFlags::PRIVATE,
       )
+      .ok()?
     };
 
-    if ptr == libc::MAP_FAILED {
-      return None;
-    }
-
     Some(Self {
-      ptr: ptr,
+      ptr: ptr as *mut u8,
       size,
     })
   }
 
   pub fn set_exec(&mut self) -> Option<()> {
-    let res = unsafe {
-      libc::mprotect(
-        self.ptr as *mut libc::c_void,
+    unsafe {
+      mprotect(
+        self.ptr as *mut c_void,
         self.size,
-        libc::PROT_READ | libc::PROT_EXEC,
+        MprotectFlags::READ | MprotectFlags::EXEC,
       )
-    };
-
-    if res != 0 {
-      return None;
     }
+    .ok()?;
 
     unsafe {
-      sys_icache_invalidate(self.ptr as *mut libc::c_void, self.size);
+      sys_icache_invalidate(self.ptr as *mut c_void, self.size);
     }
 
     Some(())
@@ -54,10 +52,7 @@ impl Jit {
 
   pub fn as_slice(&mut self) -> &mut [u32] {
     unsafe {
-      return std::slice::from_raw_parts_mut(
-        self.ptr as *mut u32,
-        self.size / std::mem::size_of::<u32>(),
-      );
+      return std::slice::from_raw_parts_mut(self.ptr as *mut u32, self.size / size_of::<u32>());
     }
   }
 
@@ -69,7 +64,7 @@ impl Jit {
 impl Drop for Jit {
   fn drop(&mut self) {
     unsafe {
-      libc::munmap(self.ptr as *mut libc::c_void, self.size);
+      let _ = munmap(self.ptr as *mut c_void, self.size);
     }
   }
 }
@@ -80,7 +75,7 @@ mod tests {
 
   #[test]
   fn test_jit() {
-    let asm = crate::asm! {
+    let asm = asm! {
       sub_r(x0, x0, x1);
       ret();
     };
@@ -90,7 +85,7 @@ mod tests {
     jit.set_exec().unwrap();
 
     type U64Op2 = unsafe extern "C" fn(u64, u64) -> u64;
-    let fun: U64Op2 = unsafe { std::mem::transmute(jit.ptr) };
+    let fun: U64Op2 = unsafe { transmute(jit.ptr) };
     let result = unsafe { fun(50, 40) };
     assert_eq!(result, 10);
   }

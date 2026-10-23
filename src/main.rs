@@ -4,6 +4,7 @@ mod jit;
 mod op;
 
 use jit::Jit;
+use std::mem::transmute;
 
 pub fn main() {
   let mut jit = Jit::new(4096).unwrap();
@@ -19,7 +20,7 @@ pub fn main() {
 
   type U64Op2 = unsafe extern "C" fn(u64, u64) -> u64;
 
-  let fun: U64Op2 = unsafe { std::mem::transmute(jit.ptr) };
+  let fun: U64Op2 = unsafe { transmute(jit.ptr) };
 
   let result = unsafe { fun(50, 40) };
 
