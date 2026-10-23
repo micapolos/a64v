@@ -5,7 +5,7 @@ extern "C" {
 }
 
 pub struct Jit {
-  pub ptr: *mut u8,
+  pub ptr: *mut std::ffi::c_void,
   pub size: usize,
 }
 
@@ -27,7 +27,7 @@ impl Jit {
     }
 
     Some(Self {
-      ptr: ptr as *mut u8,
+      ptr: ptr,
       size,
     })
   }
