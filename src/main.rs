@@ -28,8 +28,8 @@ pub fn main() {
   }
 
   let code = asm! {
-    sub_r(x0, x0, x1)
-    ret()
+    sub_r(x0, x0, x1);
+    ret();
   };
 
   unsafe {

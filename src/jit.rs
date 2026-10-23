@@ -77,8 +77,8 @@ mod tests {
   #[test]
   fn test_jit() {
     let asm = crate::asm! {
-      sub_r(x0, x0, x1)
-      ret()
+      sub_r(x0, x0, x1);
+      ret();
     };
 
     let mut jit = Jit::new(4096).unwrap();
