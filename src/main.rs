@@ -1,8 +1,9 @@
 use std::ptr;
 
-mod op;
 mod a64;
 mod asm;
+mod jit;
+mod op;
 
 extern "C" {
   fn sys_icache_invalidate(addr: *mut std::ffi::c_void, len: usize);
@@ -39,9 +40,7 @@ pub fn main() {
     );
   }
 
-  let protect_res = unsafe {
-    libc::mprotect(ptr, size, libc::PROT_READ | libc::PROT_EXEC)
-  };
+  let protect_res = unsafe { libc::mprotect(ptr, size, libc::PROT_READ | libc::PROT_EXEC) };
 
   if protect_res != 0 {
     panic!("mprotect failed to make memory executable!");
