@@ -1,8 +1,8 @@
-use rustix::mm::{mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags};
-use std::{
-  ffi::c_void,
-  mem::size_of,
-  ptr::null_mut,
+use {
+  rustix::mm::{
+    mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags,
+  },
+  std::{ffi::c_void, mem::size_of, ptr::null_mut},
 };
 
 extern "C" {
@@ -51,7 +51,10 @@ impl Jit {
 
   pub fn as_slice(&mut self) -> &mut [u32] {
     unsafe {
-      std::slice::from_raw_parts_mut(self.ptr as *mut u32, self.size / size_of::<u32>())
+      std::slice::from_raw_parts_mut(
+        self.ptr as *mut u32,
+        self.size / size_of::<u32>(),
+      )
     }
   }
 
@@ -70,9 +73,7 @@ impl Drop for Jit {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
-  use crate::asm;
-  use std::mem::transmute;
+  use {super::*, crate::asm, std::mem::transmute};
 
   #[test]
   fn test_jit() {
