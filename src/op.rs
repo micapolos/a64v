@@ -18,7 +18,7 @@ macro_rules! op {
 macro_rules! mask {
   ($bits:expr) => {
     (1 << $bits) - 1
-  }
+  };
 }
 
 #[macro_export]
