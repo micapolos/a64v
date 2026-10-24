@@ -1,16 +1,16 @@
 use crate::register_set::RegisterSet;
 
 pub struct FunctionDeclaration {
-  pub input_registers: RegisterSet,
-  pub output_registers: RegisterSet,
+  pub input_register_set: RegisterSet,
+  pub output_register_set: RegisterSet,
   pub stack_size: usize,
 }
 
 impl FunctionDeclaration {
   pub fn empty() -> Self {
     Self {
-      input_registers: RegisterSet::empty(),
-      output_registers: RegisterSet::empty(),
+      input_register_set: RegisterSet::empty(),
+      output_register_set: RegisterSet::empty(),
       stack_size: 0,
     }
   }

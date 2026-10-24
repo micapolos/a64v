@@ -1,3 +1,7 @@
+enum ValidatorError {
+  GENERAL,
+}
+
 pub struct Entry {
   pub mut input_registers_mask: RegisterSet;
   pub mut output_registers_mask: RegisterSet;
@@ -14,9 +18,9 @@ impl Frame {
     defined_registers_mask & register.mask() != 0
   }
 
-  fn read_register(&self, register: Register) -> Result<(), String> {
+  fn read_register(&self, register: Register) -> Result<(), ValidatorError> {
     if (!self.is_register_readable) {
-      return Err("dupa")
+      return ValidatorError::GENERAL;
     }
     Ok(())
   }
