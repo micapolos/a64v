@@ -18,21 +18,61 @@ impl Register {
   pub const XZR: Register = Self { index: 31 };
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Set {
+  mask: u32,
+}
+
+impl Set {
+  pub fn empty() -> Self {
+    Self { mask: 0 }
+  }
+
+  pub fn is_empty(&self) -> bool {
+    self.mask == 0
+  }
+
+  pub fn add(&mut self, register: Register) {
+    self.mask = (self.mask & !register.mask()) | register.mask();
+  }
+
+  pub fn contains(&self, register: Register) -> bool {
+    self.mask & register.mask() != 0
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
 
   #[test]
-  fn test_index() {
+  fn test_register_index() {
     assert_eq!(Register::X0.index(), 0);
     assert_eq!(Register::X1.index(), 1);
     assert_eq!(Register::XZR.index(), 31);
   }
 
   #[test]
-  fn test_mask() {
+  fn test_register_mask() {
     assert_eq!(Register::X0.mask(), 0b1);
     assert_eq!(Register::X1.mask(), 0b10);
     assert_eq!(Register::XZR.mask(), 0b10000000_00000000_00000000_00000000);
+  }
+
+  #[test]
+  fn test_set_empty() {
+    let mut set = Set::empty();
+    assert!(set.is_empty());
+
+    assert!(!set.contains(Register::X0));
+    assert!(!set.contains(Register::X1));
+    assert!(!set.contains(Register::XZR));
+
+    set.add(Register::X0);
+    set.add(Register::XZR);
+
+    assert!(set.contains(Register::X0));
+    assert!(!set.contains(Register::X1));
+    assert!(set.contains(Register::XZR));
   }
 }

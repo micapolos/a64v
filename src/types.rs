@@ -1,16 +1,16 @@
-use crate::register_set::RegisterSet;
+use crate::register::Set;
 
 pub struct Function {
-  pub input_register_set: RegisterSet,
-  pub output_register_set: RegisterSet,
+  pub input_register_set: Set,
+  pub output_register_set: Set,
   pub stack_size: usize,
 }
 
 impl Function {
   pub fn empty() -> Self {
     Self {
-      input_register_set: RegisterSet::empty(),
-      output_register_set: RegisterSet::empty(),
+      input_register_set: Set::empty(),
+      output_register_set: Set::empty(),
       stack_size: 0,
     }
   }

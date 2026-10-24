@@ -1,20 +1,20 @@
-use crate::register_set::RegisterSet;
+use crate::register::Set;
 use crate::register::Register;
 
 pub struct Frame {
-  defined_register_set: RegisterSet,
-  readable_register_set: RegisterSet,
-  writable_register_set: RegisterSet,
-  dirty_register_set: RegisterSet,
+  defined_register_set: Set,
+  readable_register_set: Set,
+  writable_register_set: Set,
+  dirty_register_set: Set,
 }
 
 impl Frame {
   pub fn new() -> Self {
     Frame {
-      defined_register_set: RegisterSet::empty(),
-      readable_register_set: RegisterSet::empty(),
-      writable_register_set: RegisterSet::empty(),
-      dirty_register_set: RegisterSet::empty(),
+      defined_register_set: Set::empty(),
+      readable_register_set: Set::empty(),
+      writable_register_set: Set::empty(),
+      dirty_register_set: Set::empty(),
     }
   }
 

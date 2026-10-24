@@ -3,14 +3,14 @@ enum ValidatorError {
 }
 
 pub struct Entry {
-  pub mut input_registers_mask: RegisterSet;
-  pub mut output_registers_mask: RegisterSet;
-  pub mut clobbered_registers_mask: RegisterSet;
+  pub mut input_registers_mask: Set;
+  pub mut output_registers_mask: Set;
+  pub mut clobbered_registers_mask: Set;
 }
 
 pub struct Frame {
-  pub mut defined_registers_mask: RegisterSet;
-  pub mut dirty_registers_mask: RegisterSet;
+  pub mut defined_registers_mask: Set;
+  pub mut dirty_registers_mask: Set;
 }
 
 impl Frame {
