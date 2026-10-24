@@ -1,5 +1,6 @@
 use crate::register::Register;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RegisterSet {
   mask: u32,
 }

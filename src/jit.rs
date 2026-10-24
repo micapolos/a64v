@@ -1,6 +1,6 @@
 use {
   rustix::mm::{
-    mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags,
+    MapFlags, MprotectFlags, ProtFlags, mmap_anonymous, mprotect, munmap,
   },
   std::{ffi::c_void, mem::size_of, ptr::null_mut},
 };

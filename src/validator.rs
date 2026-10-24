@@ -1,7 +1,3 @@
-pub struct Validator {
-  mut pc: u64;
-}
-
 pub struct Entry {
   pub mut input_registers_mask: RegisterSet;
   pub mut output_registers_mask: RegisterSet;
@@ -17,6 +13,18 @@ impl Frame {
   fn is_register_readable(register: Register) -> Bool {
     defined_registers_mask & register.mask() != 0
   }
+
+  fn read_register(&self, register: Register) -> Result<(), String> {
+    if (!self.is_register_readable) {
+      return Err("dupa")
+    }
+    Ok(())
+  }
+}
+
+pub struct Validator {
+  pc: u64,
+  frame: Frame,
 }
 
 impl Validator {
