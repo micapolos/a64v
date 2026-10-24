@@ -13,8 +13,12 @@ impl RegisterSet {
     self.mask == 0
   }
 
+  pub fn add(&mut self, register: Register) {
+    self.mask = (self.mask & !register.mask()) | register.mask();
+  }
+
   pub fn contains(&self, register: Register) -> bool {
-    self.mask & register.index() != 0
+    self.mask & register.mask() != 0
   }
 }
 
@@ -24,8 +28,18 @@ mod tests {
 
   #[test]
   fn test_empty() {
-    let register_set = RegisterSet::empty();
-    assert!(!register_set.contains(Register::X0));
+    let mut register_set = RegisterSet::empty();
     assert!(register_set.is_empty());
+
+    assert!(!register_set.contains(Register::X0));
+    assert!(!register_set.contains(Register::X1));
+    assert!(!register_set.contains(Register::XZR));
+
+    register_set.add(Register::X0);
+    register_set.add(Register::XZR);
+
+    assert!(register_set.contains(Register::X0));
+    assert!(!register_set.contains(Register::X1));
+    assert!(register_set.contains(Register::XZR));
   }
 }
