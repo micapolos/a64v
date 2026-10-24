@@ -91,7 +91,11 @@ macro_rules! a64 {
 }
 
 pub fn is_ari_sh_reg(op: u32) -> bool {
-  bits!(op, 5, 24) == 0
+  bits!(op, 5, 24) == 0b01011
+}
+
+pub fn ari_sh_reg_sf(op: u32) -> u32 {
+  bits!(op, 1, 31)
 }
 
 pub fn ari_sh_reg_op(op: u32) -> u32 {
@@ -102,24 +106,26 @@ pub fn ari_sh_reg_s(op: u32) -> u32 {
   bits!(op, 1, 29)
 }
 
-pub fn ari_sh_rm(op: u32) -> u32 {
+pub fn ari_sh_reg_rm(op: u32) -> u32 {
   bits!(op, 5, 16)
 }
 
-pub fn ari_sh_imm6(op: u32) -> u32 {
+pub fn ari_sh_reg_imm6(op: u32) -> u32 {
   bits!(op, 6, 10)
 }
 
-pub fn ari_sh_rn(op: u32) -> u32 {
+pub fn ari_sh_reg_rn(op: u32) -> u32 {
   bits!(op, 5, 5)
 }
 
-pub fn ari_sh_rd(op: u32) -> u32 {
+pub fn ari_sh_reg_rd(op: u32) -> u32 {
   bits!(op, 5)
 }
 
 #[cfg(test)]
 mod tests {
+  use super::*;
+
   #[test]
   fn test_reg() {
     assert_eq!(reg!(x30), 30);
@@ -131,5 +137,20 @@ mod tests {
     assert!(a64!(ret_r(x30)) != 0);
     assert_eq!(a64!(ret()), a64!(ret_r(x30)));
     assert_ne!(a64!(add_r(x0, x0, x1)), 0);
+  }
+
+  #[test]
+  fn test_ari_sh_reg() {
+    assert!(is_ari_sh_reg(0b100_01011_00_0_00000_000000_00000_00000));
+    assert_eq!(ari_sh_reg_sf(0b000_01011_00_0_00000_000000_00000_00000), 0);
+    assert_eq!(ari_sh_reg_sf(0b100_01011_00_0_00000_000000_00000_00000), 1);
+    assert_eq!(ari_sh_reg_op(0b000_01011_00_0_00000_000000_00000_00000), 0);
+    assert_eq!(ari_sh_reg_op(0b010_01011_00_0_00000_000000_00000_00000), 1);
+    assert_eq!(ari_sh_reg_s(0b000_01011_00_0_00000_000000_00000_00000), 0);
+    assert_eq!(ari_sh_reg_s(0b001_01011_00_0_00000_000000_00000_00000), 1);
+    assert_eq!(ari_sh_reg_rm(0b000_01011_00_0_10100_000000_00000_00000), 0b10100);
+    assert_eq!(ari_sh_reg_imm6(0b000_01011_00_0_00000_100110_00000_00000), 0b100110);
+    assert_eq!(ari_sh_reg_rn(0b000_01011_00_0_00000_000000_10100_00000), 0b10100);
+    assert_eq!(ari_sh_reg_rd(0b000_01011_00_0_00110_000000_00000_10100), 0b10100);
   }
 }
