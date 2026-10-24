@@ -14,6 +14,24 @@ macro_rules! op {
   };
 }
 
+#[macro_export]
+macro_rules! mask {
+  ($bits:expr) => {
+    (1 << $bits) - 1
+  }
+}
+
+#[macro_export]
+macro_rules! bits {
+  ($expr:expr, $bits:expr, $shift:expr) => {
+    $crate::bits!($expr >> $shift, $bits)
+  };
+
+  ($expr:expr, $bits:expr) => {
+    $expr & $crate::mask!($bits)
+  };
+}
+
 #[cfg(test)]
 mod tests {
   #[test]

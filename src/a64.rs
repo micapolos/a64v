@@ -1,3 +1,5 @@
+use crate::bits;
+
 #[macro_export]
 macro_rules! reg {
   (x0) => {
@@ -86,6 +88,34 @@ macro_rules! a64 {
       5 $crate::reg!($r1),
     )
   };
+}
+
+pub fn is_ari_sh_reg(op: u32) -> bool {
+  bits!(op, 5, 24) == 0
+}
+
+pub fn ari_sh_reg_op(op: u32) -> u32 {
+  bits!(op, 1, 30)
+}
+
+pub fn ari_sh_reg_s(op: u32) -> u32 {
+  bits!(op, 1, 29)
+}
+
+pub fn ari_sh_rm(op: u32) -> u32 {
+  bits!(op, 5, 16)
+}
+
+pub fn ari_sh_imm6(op: u32) -> u32 {
+  bits!(op, 6, 10)
+}
+
+pub fn ari_sh_rn(op: u32) -> u32 {
+  bits!(op, 5, 5)
+}
+
+pub fn ari_sh_rd(op: u32) -> u32 {
+  bits!(op, 5)
 }
 
 #[cfg(test)]
