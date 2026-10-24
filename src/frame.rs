@@ -1,5 +1,4 @@
-use crate::register::Set;
-use crate::register::Register;
+use crate::register::{Register, Set};
 
 pub struct Frame {
   defined_register_set: Set,
@@ -28,7 +27,10 @@ impl Frame {
     Ok(())
   }
 
-  pub fn write_register(&mut self, register: Register) -> Result<(), &'static str> {
+  pub fn write_register(
+    &mut self,
+    register: Register,
+  ) -> Result<(), &'static str> {
     if !self.writable_register_set.contains(register) {
       return Err("register not writable");
     }
