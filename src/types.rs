@@ -1,12 +1,12 @@
 use crate::register_set::RegisterSet;
 
-pub struct FunctionDeclaration {
+pub struct Function {
   pub input_register_set: RegisterSet,
   pub output_register_set: RegisterSet,
   pub stack_size: usize,
 }
 
-impl FunctionDeclaration {
+impl Function {
   pub fn empty() -> Self {
     Self {
       input_register_set: RegisterSet::empty(),
@@ -22,7 +22,7 @@ mod tests {
 
   #[test]
   fn test_new() {
-    let function_declaration = FunctionDeclaration::empty();
-    assert_eq!(function_declaration.stack_size, 0);
+    let function = Function::empty();
+    assert_eq!(function.stack_size, 0);
   }
 }
