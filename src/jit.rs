@@ -5,7 +5,7 @@ use {
   std::{ffi::c_void, mem::size_of, ptr::null_mut},
 };
 
-extern "C" {
+unsafe extern "C" {
   fn sys_icache_invalidate(addr: *mut c_void, len: usize);
 }
 

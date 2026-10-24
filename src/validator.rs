@@ -1,20 +1,8 @@
-pub struct Register(pub index: u32)
-
-impl Register {
-  fn mask() { 1 << index }
-}
-
 pub struct Validator {
   mut pc: u64;
 }
 
-pub struct RegisterSet(mask: u32)
-
-impl RegisterSet {
-  fn empty() -> RegisterSet { RegisterSet(0) }
-}
-
-pub struct FunctionDeclaration {
+pub struct Entry {
   pub mut input_registers_mask: RegisterSet;
   pub mut output_registers_mask: RegisterSet;
   pub mut clobbered_registers_mask: RegisterSet;
