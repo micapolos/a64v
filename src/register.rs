@@ -4,6 +4,11 @@ pub struct Register {
 }
 
 impl Register {
+  pub fn with_index(index: u8) -> Self {
+    assert!(index < 32);
+    Self { index }
+  }
+
   pub fn index(&self) -> u32 {
     self.index as u32
   }
@@ -44,6 +49,12 @@ impl Set {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn test_register_with_index() {
+    assert_eq!(Register::with_index(0), Register::X0);
+    assert_eq!(Register::with_index(31), Register::XZR);
+  }
 
   #[test]
   fn test_register_index() {
