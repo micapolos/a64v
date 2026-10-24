@@ -33,6 +33,7 @@ impl Frame {
       return Err("register not writable");
     }
     self.dirty_register_set.add(register);
+    self.defined_register_set.add(register);
     Ok(())
   }
 }
