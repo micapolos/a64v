@@ -86,9 +86,9 @@ mod tests {
     jit.copy_from_slice(&asm);
     jit.set_executable().unwrap();
 
-    type U64Op2 = unsafe extern "C" fn(u64, u64) -> u64;
+    type U64Op2 = extern "C" fn(u64, u64) -> u64;
     let fun: U64Op2 = unsafe { transmute(jit.ptr) };
-    let result = unsafe { fun(50, 40) };
+    let result = fun(50, 40);
     assert_eq!(result, 10);
   }
 }
