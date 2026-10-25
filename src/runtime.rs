@@ -3,14 +3,14 @@ use {crate::comptime::Type, std::mem::transmute};
 #[derive(Debug, Clone, PartialEq)]
 pub struct Value {
   typ: Type,
-  payload: usize,
+  x: usize,
 }
 
-impl Value {
-  pub fn new_u64(v: u64) -> Self {
+impl From<u64> for Value {
+  fn from(x: u64) -> Self {
     Value {
       typ: Type::U64,
-      payload: v as usize,
+      x: x as usize,
     }
   }
 }
@@ -30,42 +30,42 @@ impl Value {
     }
 
     let arg0 = if let Some(v) = args.get(0) {
-      v.payload
+      v.x
     } else {
       0
     };
     let arg1 = if let Some(v) = args.get(1) {
-      v.payload
+      v.x
     } else {
       0
     };
     let arg2 = if let Some(v) = args.get(2) {
-      v.payload
+      v.x
     } else {
       0
     };
     let arg3 = if let Some(v) = args.get(3) {
-      v.payload
+      v.x
     } else {
       0
     };
     let arg4 = if let Some(v) = args.get(4) {
-      v.payload
+      v.x
     } else {
       0
     };
     let arg5 = if let Some(v) = args.get(5) {
-      v.payload
+      v.x
     } else {
       0
     };
     let arg6 = if let Some(v) = args.get(6) {
-      v.payload
+      v.x
     } else {
       0
     };
     let arg7 = if let Some(v) = args.get(7) {
-      v.payload
+      v.x
     } else {
       0
     };
@@ -80,13 +80,13 @@ impl Value {
       usize,
       usize,
     ) -> usize;
-    let fun: Fn = unsafe { transmute(self.payload) };
+    let fun: Fn = unsafe { transmute(self.x) };
     let result = fun(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 
     Ok(match &func.output {
       Some(result_type) => Some(Value {
         typ: result_type.clone(),
-        payload: result,
+        x: result,
       }),
       None => None,
     })
@@ -110,7 +110,7 @@ mod tests {
 
     let value = Value {
       typ,
-      payload: c_void as *const () as usize,
+      x: c_void as *const () as usize,
     };
 
     let result = value.call(vec![]);
@@ -133,17 +133,17 @@ mod tests {
 
     let value = Value {
       typ,
-      payload: c_sub as *const () as usize,
+      x: c_sub as *const () as usize,
     };
 
-    let result = value.call(vec![Value::new_u64(30), Value::new_u64(20)]);
+    let result = value.call(vec![Value::from(30), Value::from(20)]);
 
-    assert_eq!(result, Ok(Some(Value::new_u64(10))));
+    assert_eq!(result, Ok(Some(Value::from(10))));
   }
 
   #[test]
   fn test_value_call_not_function() {
-    let value = Value::new_u64(0);
+    let value = Value::from(0);
     let result = value.call(vec![]);
     assert_eq!(result, Err("not a function"));
   }
@@ -157,9 +157,9 @@ mod tests {
 
     let typ = Type::Function(Box::new(function));
 
-    let value = Value { typ, payload: 0 };
+    let value = Value { typ, x: 0 };
 
-    let result = value.call(vec![Value::new_u64(30)]);
+    let result = value.call(vec![Value::from(30)]);
 
     assert_eq!(result, Err("arg count mismatch"));
   }
@@ -183,18 +183,18 @@ mod tests {
 
     let typ = Type::Function(Box::new(function));
 
-    let value = Value { typ, payload: 0 };
+    let value = Value { typ, x: 0 };
 
     let result = value.call(vec![
-      Value::new_u64(30),
-      Value::new_u64(30),
-      Value::new_u64(30),
-      Value::new_u64(30),
-      Value::new_u64(30),
-      Value::new_u64(30),
-      Value::new_u64(30),
-      Value::new_u64(30),
-      Value::new_u64(30),
+      Value::from(30),
+      Value::from(30),
+      Value::from(30),
+      Value::from(30),
+      Value::from(30),
+      Value::from(30),
+      Value::from(30),
+      Value::from(30),
+      Value::from(30),
     ]);
 
     assert_eq!(result, Err("max args 8"));
