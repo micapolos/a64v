@@ -1,94 +1,113 @@
-use std::ffi::c_void;
-use std::mem::transmute;
-use crate::comptime::{Type};
-use crate::comptime;
+use {crate::comptime::Type, std::mem::transmute};
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Value {
-  U32(u32),
-  U64(u64),
-}
-
-impl From<u64> for Value {
-  fn from(n: u64) -> Self {
-    Value::U64(n)
-  }
-}
-
-impl TryFrom<Value> for u64 {
-  type Error = ();
-
-  fn try_from(value: Value) -> Result<Self, Self::Error> {
-    match value {
-      Value::U32(_) => Err(()),
-      Value::U64(value) => Ok(value),
-    }
-  }
-}
-
-pub struct Function {
-  pub comptime: comptime::Function,
-  pub address: *const c_void,
-}
-
-impl Function {
-  pub fn call(&self, args: Vec<Value>) -> Result<Option<Value>, ()> {
-    if args.len() >= 8 {
-      return Err(());
-    }
-
-    type Fn = extern "C" fn(u64, u64, u64, u64, u64, u64, u64, u64) -> u64;
-    let fun: Fn = unsafe { transmute(self.address) };
-    let result = fun(0, 0, 0, 0, 0, 0, 0, 0);
-
-    Ok(Some(Value::from(result)))
-  }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct Typed {
+pub struct Value {
   typ: Type,
-  value: Value,
+  payload: usize,
 }
 
-impl Typed {
-  pub fn new(typ: Type, value: Value) -> Result<Self, ()> {
-    match typ {
-      Type::U32 => match value {
-        Value::U32(_) => Ok(Typed { typ, value }),
-        _ => Err(()),
-      },
-      Type::U64 => match value {
-        Value::U64(_) => Ok(Typed { typ, value }),
-        _ => Err(()),
-      },
-      Type::Function(_) => {
-        Err(())
-      }
+impl Value {
+  pub fn new_u64(v: u64) -> Self {
+    Value {
+      typ: Type::U64,
+      payload: v as usize,
     }
+  }
+}
+
+impl Value {
+  pub fn call(&self, args: Vec<Value>) -> Result<Option<Value>, &'static str> {
+    let Type::Function(ref func) = self.typ else {
+      return Err("not a function");
+    };
+
+    if args.len() != func.input.len() {
+      return Err("arg count mismatch");
+    }
+
+    if args.len() > 8 {
+      return Err("max args 8");
+    }
+
+    let arg0 = if let Some(v) = args.get(0) {
+      v.payload
+    } else {
+      0
+    };
+    let arg1 = if let Some(v) = args.get(1) {
+      v.payload
+    } else {
+      0
+    };
+    let arg2 = if let Some(v) = args.get(2) {
+      v.payload
+    } else {
+      0
+    };
+    let arg3 = if let Some(v) = args.get(3) {
+      v.payload
+    } else {
+      0
+    };
+    let arg4 = if let Some(v) = args.get(4) {
+      v.payload
+    } else {
+      0
+    };
+    let arg5 = if let Some(v) = args.get(5) {
+      v.payload
+    } else {
+      0
+    };
+    let arg6 = if let Some(v) = args.get(6) {
+      v.payload
+    } else {
+      0
+    };
+    let arg7 = if let Some(v) = args.get(7) {
+      v.payload
+    } else {
+      0
+    };
+
+    type Fn = extern "C" fn(usize, usize, usize, usize, usize, usize, usize, usize) -> usize;
+    let fun: Fn = unsafe { transmute(self.payload) };
+    let result = fun(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+
+    Ok(match &func.output {
+      Some(result_type) => Some(Value {
+        typ: result_type.clone(),
+        payload: result,
+      }),
+      None => None,
+    })
   }
 }
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+  use {super::*, crate::comptime::Function};
 
-  #[test]
-  fn test_value_from() {
-    assert_eq!(Value::from(0x1234).try_into(), Ok(0x1234));
+  extern "C" fn c_sub(x: u64, y: u64) -> u64 {
+    x - y
   }
 
   #[test]
-  fn test_typed() {
-    assert_eq!(
-      Typed::new(Type::U64, Value::from(0x1234)),
-      Typed::new(Type::U64, Value::from(0x1234)));
-  }
+  fn test_value_call() {
+    let function = Function {
+      input: Box::new([Type::U64, Type::U64]),
+      output: Some(Type::U64),
+    };
 
-  #[test]
-  fn test_function() {
-    assert_eq!(
-      Typed::new(Type::U64, Value::from(0x1234)),
-      Typed::new(Type::U64, Value::from(0x1234)));
+    let typ = Type::Function(Box::new(function));
+
+    let value = Value {
+      typ,
+      payload: c_sub as *const () as usize,
+    };
+
+    let result = value.call(vec![Value::new_u64(30), Value::new_u64(20)]).unwrap();
+
+    assert_eq!(result, Some(Value::new_u64(10)));
   }
 }
