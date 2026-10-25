@@ -13,7 +13,9 @@ pub enum Size {
 
 impl Register {
   pub fn decode(index: u32) -> Self {
-    Self { index: bits!(index, 5) as u8 }
+    Self {
+      index: bits!(index, 5) as u8,
+    }
   }
 
   pub fn index(&self) -> u32 {

@@ -1,9 +1,10 @@
 pub mod a64;
 pub mod asm;
+pub mod comptime;
 pub mod frame;
+pub mod function;
 pub mod jit;
 mod op;
 pub mod register;
-pub mod types;
-pub mod function;
 pub mod runtime;
+pub mod types;
