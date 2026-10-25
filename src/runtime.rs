@@ -70,7 +70,16 @@ impl Value {
       0
     };
 
-    type Fn = extern "C" fn(usize, usize, usize, usize, usize, usize, usize, usize) -> usize;
+    type Fn = extern "C" fn(
+      usize,
+      usize,
+      usize,
+      usize,
+      usize,
+      usize,
+      usize,
+      usize,
+    ) -> usize;
     let fun: Fn = unsafe { transmute(self.payload) };
     let result = fun(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 
@@ -88,12 +97,33 @@ impl Value {
 mod tests {
   use {super::*, crate::comptime::Function};
 
-  extern "C" fn c_sub(x: u64, y: u64) -> u64 {
-    x - y
+  #[test]
+  fn test_value_call_void() {
+    extern "C" fn c_void() {}
+
+    let function = Function {
+      input: Box::new([]),
+      output: None,
+    };
+
+    let typ = Type::Function(Box::new(function));
+
+    let value = Value {
+      typ,
+      payload: c_void as *const () as usize,
+    };
+
+    let result = value.call(vec![]);
+
+    assert_eq!(result, Ok(None));
   }
 
   #[test]
-  fn test_value_call() {
+  fn test_value_call_sub() {
+    extern "C" fn c_sub(x: u64, y: u64) -> u64 {
+      x - y
+    }
+
     let function = Function {
       input: Box::new([Type::U64, Type::U64]),
       output: Some(Type::U64),
@@ -106,8 +136,67 @@ mod tests {
       payload: c_sub as *const () as usize,
     };
 
-    let result = value.call(vec![Value::new_u64(30), Value::new_u64(20)]).unwrap();
+    let result = value.call(vec![Value::new_u64(30), Value::new_u64(20)]);
 
-    assert_eq!(result, Some(Value::new_u64(10)));
+    assert_eq!(result, Ok(Some(Value::new_u64(10))));
+  }
+
+  #[test]
+  fn test_value_call_not_function() {
+    let value = Value::new_u64(0);
+    let result = value.call(vec![]);
+    assert_eq!(result, Err("not a function"));
+  }
+
+  #[test]
+  fn test_value_call_arg_count_mismatch() {
+    let function = Function {
+      input: Box::new([Type::U64, Type::U64]),
+      output: Some(Type::U64),
+    };
+
+    let typ = Type::Function(Box::new(function));
+
+    let value = Value { typ, payload: 0 };
+
+    let result = value.call(vec![Value::new_u64(30)]);
+
+    assert_eq!(result, Err("arg count mismatch"));
+  }
+
+  #[test]
+  fn test_value_call_max_args() {
+    let function = Function {
+      input: Box::new([
+        Type::U64,
+        Type::U64,
+        Type::U64,
+        Type::U64,
+        Type::U64,
+        Type::U64,
+        Type::U64,
+        Type::U64,
+        Type::U64,
+      ]),
+      output: Some(Type::U64),
+    };
+
+    let typ = Type::Function(Box::new(function));
+
+    let value = Value { typ, payload: 0 };
+
+    let result = value.call(vec![
+      Value::new_u64(30),
+      Value::new_u64(30),
+      Value::new_u64(30),
+      Value::new_u64(30),
+      Value::new_u64(30),
+      Value::new_u64(30),
+      Value::new_u64(30),
+      Value::new_u64(30),
+      Value::new_u64(30),
+    ]);
+
+    assert_eq!(result, Err("max args 8"));
   }
 }
