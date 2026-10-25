@@ -16,7 +16,7 @@ impl From<u64> for Value {
 }
 
 impl Value {
-  pub fn call(&self, args: Vec<Value>) -> Result<Option<Value>, &'static str> {
+  pub fn call(&self, args: &[Value]) -> Result<Option<Value>, &'static str> {
     let Type::Function(ref func) = self.typ else {
       return Err("not a function");
     };
@@ -30,7 +30,7 @@ impl Value {
     }
 
     let mut xs = [0usize; 8];
-    for (dest, src) in xs.iter_mut().zip(&args) {
+    for (dest, src) in xs.iter_mut().zip(args) {
       *dest = src.x;
     }
 
@@ -80,7 +80,7 @@ mod tests {
       x: c_void as *const () as usize,
     };
 
-    let result = value.call(vec![]);
+    let result = value.call(&[]);
 
     assert_eq!(result, Ok(None));
   }
@@ -103,7 +103,7 @@ mod tests {
       x: c_sub as *const () as usize,
     };
 
-    let result = value.call(vec![Value::from(30), Value::from(20)]);
+    let result = value.call(&[Value::from(30), Value::from(20)]);
 
     assert_eq!(result, Ok(Some(Value::from(10))));
   }
@@ -111,7 +111,7 @@ mod tests {
   #[test]
   fn test_value_call_not_function() {
     let value = Value::from(0);
-    let result = value.call(vec![]);
+    let result = value.call(&[]);
     assert_eq!(result, Err("not a function"));
   }
 
@@ -126,7 +126,7 @@ mod tests {
 
     let value = Value { typ, x: 0 };
 
-    let result = value.call(vec![Value::from(30)]);
+    let result = value.call(&[Value::from(30)]);
 
     assert_eq!(result, Err("arg count mismatch"));
   }
@@ -142,7 +142,7 @@ mod tests {
 
     let value = Value { typ, x: 0 };
 
-    let result = value.call(vec![Value::from(30); 9]);
+    let result = value.call(&vec![Value::from(30); 9]);
 
     assert_eq!(result, Err("max args 8"));
   }
