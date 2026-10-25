@@ -44,8 +44,11 @@ impl Value {
       usize,
       usize,
     ) -> usize;
-    let fun: Fn = unsafe { transmute(self.x) };
-    let result = fun(xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
+
+    let function: Fn = unsafe { transmute(self.x) };
+
+    let result =
+      function(xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
 
     Ok(match &func.output {
       Some(result_type) => Some(Value {
