@@ -89,7 +89,7 @@ macro_rules! a64 {
       5 $crate::reg!($r1),
     )
   };
-  (movz_imm16($r:tt, $imm16:expr)) => {
+  (movz($r:tt, $imm16:expr)) => {
     $crate::op!(
       1 0b1,
       2 0b10,
@@ -233,7 +233,7 @@ mod tests {
       }));
 
     assert_eq!(
-      Instruction::decode(a64!(movz_imm16(x1, 0x1234))),
+      Instruction::decode(a64!(movz(x1, 0x1234))),
       Some(Instruction::MoveZeroImmediateWide {
         destination_register: Register::X1,
         immediate: 0x1234,
