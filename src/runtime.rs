@@ -131,17 +131,7 @@ mod tests {
   #[test]
   fn test_value_call_max_args() {
     let function = Function {
-      input: Box::new([
-        Type::U64,
-        Type::U64,
-        Type::U64,
-        Type::U64,
-        Type::U64,
-        Type::U64,
-        Type::U64,
-        Type::U64,
-        Type::U64,
-      ]),
+      input: vec![Type::U64; 9].into_boxed_slice(),
       output: Some(Type::U64),
     };
 
@@ -150,16 +140,7 @@ mod tests {
     let value = Value { typ, x: 0 };
 
     let result = value.call(vec![
-      Value::from(30),
-      Value::from(30),
-      Value::from(30),
-      Value::from(30),
-      Value::from(30),
-      Value::from(30),
-      Value::from(30),
-      Value::from(30),
-      Value::from(30),
-    ]);
+      Value::from(30); 9]);
 
     assert_eq!(result, Err("max args 8"));
   }
