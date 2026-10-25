@@ -62,6 +62,9 @@ impl Typed {
         Value::U64(_) => Ok(Typed { typ, value }),
         _ => Err(()),
       },
+      Type::Function(_) => {
+        Err(())
+      }
     }
   }
 }

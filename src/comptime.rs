@@ -2,11 +2,12 @@
 pub enum Type {
   U32,
   U64,
+  Function(Box<Function>),
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Function {
-  pub input: Vec<Type>,
+  pub input: Box<[Type]>,
   pub output: Option<Type>,
 }
 
@@ -22,7 +23,7 @@ mod tests {
   #[test]
   fn test_function() {
     let _ = Function {
-      input: vec![Type::U32, Type::U64],
+      input: Box::new([Type::U32, Type::U64]),
       output: Some(Type::U64),
     };
   }
