@@ -1,10 +1,7 @@
-use crate::function::{Id, Offset};
+use std::ffi::c_void;
+use std::mem::transmute;
 use crate::comptime::{Type};
-
-pub struct Function {
-  pub id: Id,
-  pub offset: Offset,
-}
+use crate::comptime;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -26,6 +23,25 @@ impl TryFrom<Value> for u64 {
       Value::U32(_) => Err(()),
       Value::U64(value) => Ok(value),
     }
+  }
+}
+
+pub struct Function {
+  pub comptime: comptime::Function,
+  pub address: *const c_void,
+}
+
+impl Function {
+  pub fn call(&self, args: Vec<Value>) -> Result<Option<Value>, ()> {
+    if args.len() >= 8 {
+      return Err(());
+    }
+
+    type Fn = extern "C" fn(u64, u64, u64, u64, u64, u64, u64, u64) -> u64;
+    let fun: Fn = unsafe { transmute(self.address) };
+    let result = fun(0, 0, 0, 0, 0, 0, 0, 0);
+
+    Ok(Some(Value::from(result)))
   }
 }
 
@@ -61,6 +77,13 @@ mod tests {
 
   #[test]
   fn test_typed() {
+    assert_eq!(
+      Typed::new(Type::U64, Value::from(0x1234)),
+      Typed::new(Type::U64, Value::from(0x1234)));
+  }
+
+  #[test]
+  fn test_function() {
     assert_eq!(
       Typed::new(Type::U64, Value::from(0x1234)),
       Typed::new(Type::U64, Value::from(0x1234)));
