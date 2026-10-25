@@ -6,8 +6,7 @@ pub struct Function {
   pub offset: Offset,
 }
 
-#[cfg_attr(debug_assertions, derive(Debug))]
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Value {
   U32(u32),
   U64(u64),
@@ -30,8 +29,7 @@ impl TryFrom<Value> for u64 {
   }
 }
 
-#[cfg_attr(debug_assertions, derive(Debug))]
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Typed {
   typ: Type,
   value: Value,
