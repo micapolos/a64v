@@ -29,46 +29,14 @@ impl Value {
       return Err("max args 8");
     }
 
-    let arg0 = if let Some(v) = args.get(0) {
-      v.x
-    } else {
-      0
-    };
-    let arg1 = if let Some(v) = args.get(1) {
-      v.x
-    } else {
-      0
-    };
-    let arg2 = if let Some(v) = args.get(2) {
-      v.x
-    } else {
-      0
-    };
-    let arg3 = if let Some(v) = args.get(3) {
-      v.x
-    } else {
-      0
-    };
-    let arg4 = if let Some(v) = args.get(4) {
-      v.x
-    } else {
-      0
-    };
-    let arg5 = if let Some(v) = args.get(5) {
-      v.x
-    } else {
-      0
-    };
-    let arg6 = if let Some(v) = args.get(6) {
-      v.x
-    } else {
-      0
-    };
-    let arg7 = if let Some(v) = args.get(7) {
-      v.x
-    } else {
-      0
-    };
+    let arg0 = if let Some(v) = args.get(0) { v.x } else { 0 };
+    let arg1 = if let Some(v) = args.get(1) { v.x } else { 0 };
+    let arg2 = if let Some(v) = args.get(2) { v.x } else { 0 };
+    let arg3 = if let Some(v) = args.get(3) { v.x } else { 0 };
+    let arg4 = if let Some(v) = args.get(4) { v.x } else { 0 };
+    let arg5 = if let Some(v) = args.get(5) { v.x } else { 0 };
+    let arg6 = if let Some(v) = args.get(6) { v.x } else { 0 };
+    let arg7 = if let Some(v) = args.get(7) { v.x } else { 0 };
 
     type Fn = extern "C" fn(
       usize,
