@@ -139,8 +139,7 @@ mod tests {
 
     let value = Value { typ, x: 0 };
 
-    let result = value.call(vec![
-      Value::from(30); 9]);
+    let result = value.call(vec![Value::from(30); 9]);
 
     assert_eq!(result, Err("max args 8"));
   }
