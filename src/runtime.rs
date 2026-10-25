@@ -29,14 +29,10 @@ impl Value {
       return Err("max args 8");
     }
 
-    let arg0 = if let Some(v) = args.get(0) { v.x } else { 0 };
-    let arg1 = if let Some(v) = args.get(1) { v.x } else { 0 };
-    let arg2 = if let Some(v) = args.get(2) { v.x } else { 0 };
-    let arg3 = if let Some(v) = args.get(3) { v.x } else { 0 };
-    let arg4 = if let Some(v) = args.get(4) { v.x } else { 0 };
-    let arg5 = if let Some(v) = args.get(5) { v.x } else { 0 };
-    let arg6 = if let Some(v) = args.get(6) { v.x } else { 0 };
-    let arg7 = if let Some(v) = args.get(7) { v.x } else { 0 };
+    let mut xs = [0usize; 8];
+    for (dest, src) in xs.iter_mut().zip(&args) {
+      *dest = src.x;
+    }
 
     type Fn = extern "C" fn(
       usize,
@@ -49,7 +45,7 @@ impl Value {
       usize,
     ) -> usize;
     let fun: Fn = unsafe { transmute(self.x) };
-    let result = fun(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    let result = fun(xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
 
     Ok(match &func.output {
       Some(result_type) => Some(Value {
