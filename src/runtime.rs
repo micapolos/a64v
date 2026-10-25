@@ -6,16 +6,14 @@ pub struct Value {
   x: usize,
 }
 
-impl From<u64> for Value {
-  fn from(x: u64) -> Self {
+impl Value {
+  pub fn u64(x: u64) -> Self {
     Value {
       typ: Type::U64,
       x: x as usize,
     }
   }
-}
 
-impl Value {
   pub fn call(&self, args: &[Value]) -> Result<Option<Value>, &'static str> {
     let Type::Function(ref func) = self.typ else {
       return Err("not a function");
@@ -103,14 +101,14 @@ mod tests {
       x: c_sub as *const () as usize,
     };
 
-    let result = value.call(&[Value::from(30), Value::from(20)]);
+    let result = value.call(&[Value::u64(30), Value::u64(20)]);
 
-    assert_eq!(result, Ok(Some(Value::from(10))));
+    assert_eq!(result, Ok(Some(Value::u64(10))));
   }
 
   #[test]
   fn test_value_call_not_function() {
-    let value = Value::from(0);
+    let value = Value::u64(0);
     let result = value.call(&[]);
     assert_eq!(result, Err("not a function"));
   }
@@ -126,7 +124,7 @@ mod tests {
 
     let value = Value { typ, x: 0 };
 
-    let result = value.call(&[Value::from(30)]);
+    let result = value.call(&[Value::u64(30)]);
 
     assert_eq!(result, Err("arg count mismatch"));
   }
@@ -142,7 +140,7 @@ mod tests {
 
     let value = Value { typ, x: 0 };
 
-    let result = value.call(&vec![Value::from(30); 9]);
+    let result = value.call(&vec![Value::u64(30); 9]);
 
     assert_eq!(result, Err("max args 8"));
   }
