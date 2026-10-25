@@ -4,9 +4,9 @@ pub struct Register {
 }
 
 impl Register {
-  pub fn with_index(index: u8) -> Self {
+  pub fn with_index(index: u32) -> Self {
     assert!(index < 32);
-    Self { index }
+    Self { index: index as u8 }
   }
 
   pub fn index(&self) -> u32 {
@@ -20,6 +20,7 @@ impl Register {
   pub const X0: Register = Self { index: 0 };
   pub const X1: Register = Self { index: 1 };
   pub const X2: Register = Self { index: 2 };
+  pub const X3: Register = Self { index: 3 };
   pub const XZR: Register = Self { index: 31 };
 }
 
