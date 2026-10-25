@@ -7,11 +7,16 @@ pub struct Value {
 }
 
 impl Value {
+  pub fn typed(typ: Type, x: usize) -> Self {
+    Value { typ, x }
+  }
+
+  pub fn u32(x: u32) -> Self {
+    Value::typed(Type::U32, x as u64 as usize)
+  }
+
   pub fn u64(x: u64) -> Self {
-    Value {
-      typ: Type::U64,
-      x: x as usize,
-    }
+    Value::typed(Type::U64, x as usize)
   }
 
   pub fn call(&self, args: &[Value]) -> Result<Option<Value>, &'static str> {
@@ -49,10 +54,7 @@ impl Value {
       function(xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
 
     Ok(match &func.output {
-      Some(result_type) => Some(Value {
-        typ: result_type.clone(),
-        x: result,
-      }),
+      Some(result_type) => Some(Value::typed(result_type.clone(), result)),
       None => None,
     })
   }
@@ -71,13 +73,7 @@ mod tests {
       output: None,
     };
 
-    let typ = Type::Function(Box::new(function));
-
-    let value = Value {
-      typ,
-      x: c_void as *const () as usize,
-    };
-
+    let value = Value::typed(Type::Function(Box::new(function)), c_void as *const () as usize);
     let result = value.call(&[]);
 
     assert_eq!(result, Ok(None));
@@ -94,13 +90,10 @@ mod tests {
       output: Some(Type::U64),
     };
 
-    let typ = Type::Function(Box::new(function));
-
-    let value = Value {
-      typ,
-      x: c_sub as *const () as usize,
-    };
-
+    let value = Value::typed(
+      Type::Function(Box::new(function)),
+      c_sub as *const () as usize,
+    );
     let result = value.call(&[Value::u64(30), Value::u64(20)]);
 
     assert_eq!(result, Ok(Some(Value::u64(10))));
@@ -120,10 +113,7 @@ mod tests {
       output: Some(Type::U64),
     };
 
-    let typ = Type::Function(Box::new(function));
-
-    let value = Value { typ, x: 0 };
-
+    let value = Value::typed(Type::Function(Box::new(function)), 0);
     let result = value.call(&[Value::u64(30)]);
 
     assert_eq!(result, Err("arg count mismatch"));
@@ -136,10 +126,7 @@ mod tests {
       output: Some(Type::U64),
     };
 
-    let typ = Type::Function(Box::new(function));
-
-    let value = Value { typ, x: 0 };
-
+    let value = Value::typed(Type::Function(Box::new(function)), 0);
     let result = value.call(&vec![Value::u64(30); 9]);
 
     assert_eq!(result, Err("max args 8"));
