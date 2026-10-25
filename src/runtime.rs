@@ -38,7 +38,7 @@ pub struct Typed {
 }
 
 impl Typed {
-  pub fn with(typ: Type, value: Value) -> Result<Self, ()> {
+  pub fn new(typ: Type, value: Value) -> Result<Self, ()> {
     match typ {
       Type::U32 => match value {
         Value::U32(_) => Ok(Typed { typ, value }),
@@ -64,7 +64,7 @@ mod tests {
   #[test]
   fn test_typed() {
     assert_eq!(
-      Typed::with(Type::U64, Value::from(0x1234)),
-      Typed::with(Type::U64, Value::from(0x1234)));
+      Typed::new(Type::U64, Value::from(0x1234)),
+      Typed::new(Type::U64, Value::from(0x1234)));
   }
 }
