@@ -1,4 +1,7 @@
-use {crate::comptime::Type, std::mem::transmute};
+use {
+  crate::comptime::{Function, Type},
+  std::mem::transmute,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Value {
@@ -17,6 +20,10 @@ impl Value {
 
   pub fn u64(x: u64) -> Self {
     Value::typed(Type::U64, x as usize)
+  }
+
+  pub fn function(function: &Function, address: usize) -> Self {
+    Value::typed(Type::Function(Box::new(function.clone())), address)
   }
 
   pub fn call(&self, args: &[Value]) -> Result<Option<Value>, &'static str> {
@@ -73,7 +80,7 @@ mod tests {
       output: None,
     };
 
-    let value = Value::typed(Type::Function(Box::new(function)), c_void as *const () as usize);
+    let value = Value::function(&function, c_void as *const () as usize);
     let result = value.call(&[]);
 
     assert_eq!(result, Ok(None));
@@ -90,10 +97,7 @@ mod tests {
       output: Some(Type::U64),
     };
 
-    let value = Value::typed(
-      Type::Function(Box::new(function)),
-      c_sub as *const () as usize,
-    );
+    let value = Value::function(&function, c_sub as *const () as usize);
     let result = value.call(&[Value::u64(30), Value::u64(20)]);
 
     assert_eq!(result, Ok(Some(Value::u64(10))));
@@ -113,7 +117,7 @@ mod tests {
       output: Some(Type::U64),
     };
 
-    let value = Value::typed(Type::Function(Box::new(function)), 0);
+    let value = Value::function(&function, 0);
     let result = value.call(&[Value::u64(30)]);
 
     assert_eq!(result, Err("arg count mismatch"));
@@ -126,7 +130,7 @@ mod tests {
       output: Some(Type::U64),
     };
 
-    let value = Value::typed(Type::Function(Box::new(function)), 0);
+    let value = Value::function(&function, 0);
     let result = value.call(&vec![Value::u64(30); 9]);
 
     assert_eq!(result, Err("max args 8"));
