@@ -1,12 +1,19 @@
+use crate::bits;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Register {
   index: u8,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Size {
+  S32,
+  S64,
+}
+
 impl Register {
-  pub fn with_index(index: u32) -> Self {
-    assert!(index < 32);
-    Self { index: index as u8 }
+  pub fn decode(index: u32) -> Self {
+    Self { index: bits!(index, 5) as u8 }
   }
 
   pub fn index(&self) -> u32 {
@@ -52,9 +59,9 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_register_with_index() {
-    assert_eq!(Register::with_index(0), Register::X0);
-    assert_eq!(Register::with_index(31), Register::XZR);
+  fn test_register_decode() {
+    assert_eq!(Register::decode(0), Register::X0);
+    assert_eq!(Register::decode(31), Register::XZR);
   }
 
   #[test]

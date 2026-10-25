@@ -1,5 +1,4 @@
-use crate::bits;
-use crate::register::Register;
+use crate::{bits, register::Register};
 
 #[macro_export]
 macro_rules! reg {
@@ -151,20 +150,26 @@ pub enum Instruction {
 
 impl Instruction {
   pub fn decode(op: u32) -> Option<Self> {
-    if op & 0b111_11111_111_00000_111111_00000_00000 == 0b100_01011_000_00000_000000_00000_00000 {
+    if op & 0b111_11111_111_00000_111111_00000_00000
+      == 0b100_01011_000_00000_000000_00000_00000
+    {
       Some(Instruction::AddRegister {
-        destination_register: Register::with_index(bits!(op, 5, 0)),
-        left_register: Register::with_index(bits!(op, 5, 5)),
-        right_register: Register::with_index(bits!(op, 5, 16)),
+        destination_register: Register::decode(op),
+        left_register: Register::decode(op >> 5),
+        right_register: Register::decode(op >> 16),
       })
-    } else if op & 0b111_111111_11_0000000000000000_00000 == 0b110_100101_00_0000000000000000_00000 {
+    } else if op & 0b111_111111_11_0000000000000000_00000
+      == 0b110_100101_00_0000000000000000_00000
+    {
       Some(Instruction::MoveZeroImmediateWide {
-        destination_register: Register::with_index(bits!(op, 5, 0)),
+        destination_register: Register::decode(op),
         immediate: bits!(op, 16, 5) as u16,
       })
-    } else if op & 0b111_111_11111_11111_1111_11_00000_11111 == 0b110_101_10010_11111_0000_00_00000_00000 {
+    } else if op & 0b111_111_11111_11111_1111_11_00000_11111
+      == 0b110_101_10010_11111_0000_00_00000_00000
+    {
       Some(Instruction::Return {
-        address_register: Register::with_index(bits!(op, 5, 5)),
+        address_register: Register::decode(bits!(op, 5, 5)),
       })
     } else {
       None
@@ -222,7 +227,8 @@ mod tests {
       Instruction::decode(a64!(ret_r(x2))),
       Some(Instruction::Return {
         address_register: Register::X2,
-      }));
+      })
+    );
 
     assert_eq!(
       Instruction::decode(a64!(add_r(x1, x2, x3))),
@@ -230,13 +236,15 @@ mod tests {
         destination_register: Register::X1,
         left_register: Register::X2,
         right_register: Register::X3,
-      }));
+      })
+    );
 
     assert_eq!(
       Instruction::decode(a64!(movz(x1, 0x1234))),
       Some(Instruction::MoveZeroImmediateWide {
         destination_register: Register::X1,
         immediate: 0x1234,
-      }));
+      })
+    );
   }
 }
