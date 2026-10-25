@@ -1,6 +1,7 @@
 #[derive(Clone, PartialEq)]
 #[cfg_attr(debug_assertions, derive(Debug))]
 pub enum Type {
+  U32,
   U64,
 }
 
