@@ -1,7 +1,4 @@
-use {
-  verifier::Error,
-};
-use crate::function;
+use {crate::function, verifier::Error};
 
 mod verifier {
   #[derive(Debug, PartialEq)]
@@ -31,9 +28,8 @@ impl Verifier {
     if param_count > 8 {
       return Err(Error::InvalidParamCount);
     }
-    self.function_frame_option = Some(Box::new(function::Frame::new(
-      param_count,
-    )));
+    self.function_frame_option =
+      Some(Box::new(function::Frame::new(param_count)));
     Ok(())
   }
 
