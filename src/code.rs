@@ -1,9 +1,17 @@
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Writer {
-  ptr: *mut u32,
-  left: usize,
+  pub ptr: *mut u32,
+  pub left: usize,
 }
 
 impl Writer {
+  pub fn empty() -> Self {
+    Writer {
+      ptr: 0 as *mut u32,
+      left: 0,
+    }
+  }
+
   pub fn new(ptr: *mut u32, left: usize) -> Self {
     Writer { ptr, left }
   }
@@ -30,7 +38,10 @@ mod tests {
   #[test]
   fn test_writer() {
     let mut arr = [0, 0, 0, 0];
-    let mut writer = Writer::new(arr.as_mut_ptr(), 2);
+    let mut writer = Writer {
+      ptr: arr.as_mut_ptr(),
+      left: 2,
+    };
     assert_eq!(writer.write(10), Ok(()));
     assert_eq!(writer.write(20), Ok(()));
     assert_eq!(writer.write(30), Err(()));

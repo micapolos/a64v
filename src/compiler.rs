@@ -1,5 +1,7 @@
-use {crate::function, assembler::Error};
-use crate::jit::Jit;
+use {
+  crate::{code, function, jit::Jit},
+  assembler::Error,
+};
 
 mod assembler {
   #[derive(Debug, PartialEq)]
@@ -7,6 +9,7 @@ mod assembler {
     AlreadyInFrame,
     MissingFrame,
     InvalidParamCount,
+    OutOfMemory,
   }
 }
 
@@ -31,7 +34,13 @@ impl Assembler {
     if param_count > 8 {
       return Err(Error::InvalidParamCount);
     }
-    self.function_frame_option = Some(Box::new(function::Frame::new(param_count)));
+    self.function_frame_option = Some(Box::new(function::Frame::new(
+      param_count,
+      code::Writer {
+        ptr: self.jit.ptr as *mut u32,
+        left: self.jit.size >> 2,
+      },
+    )));
     Ok(())
   }
 
@@ -40,7 +49,7 @@ impl Assembler {
       .function_frame_option
       .as_mut()
       .ok_or(Error::MissingFrame)?;
-    frame.code.push(123);
+    frame.code_writer.write(123).map_err(|_| Error::OutOfMemory)?;
     Ok(())
   }
 }
