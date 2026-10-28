@@ -1,9 +1,9 @@
 use {
   crate::{code, function, jit::Jit},
-  assembler::Error,
+  verifier::Error,
 };
 
-mod assembler {
+mod verifier {
   #[derive(Debug, PartialEq)]
   pub enum Error {
     AlreadyInFrame,
@@ -13,15 +13,15 @@ mod assembler {
   }
 }
 
-pub struct Assembler {
+pub struct Verifier {
   jit: Jit,
   function_frame_option: Option<Box<function::Frame>>,
 }
 
-impl Assembler {
+impl Verifier {
   pub fn new() -> Result<Self, ()> {
     let jit = Jit::new(0x10000).ok_or(())?;
-    Ok(Assembler {
+    Ok(Verifier {
       jit,
       function_frame_option: None,
     })
@@ -62,21 +62,21 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_assembler_invalid_param_count() {
-    let mut assembler = Assembler::new().unwrap();
-    assert_eq!(assembler.fun(10), Err(Error::InvalidParamCount));
+  fn test_verifier_invalid_param_count() {
+    let mut verifier = Verifier::new().unwrap();
+    assert_eq!(verifier.fun(10), Err(Error::InvalidParamCount));
   }
 
   #[test]
-  fn test_assembler_fun() {
-    let mut assembler = Assembler::new().unwrap();
-    assert_eq!(assembler.fun(2), Ok(()));
+  fn test_verifier_fun() {
+    let mut verifier = Verifier::new().unwrap();
+    assert_eq!(verifier.fun(2), Ok(()));
   }
 
   #[test]
-  fn test_assembler_fun_ret() {
-    let mut assembler = Assembler::new().unwrap();
-    assert_eq!(assembler.fun(2), Ok(()));
-    assert_eq!(assembler.ret(), Ok(()));
+  fn test_verifier_fun_ret() {
+    let mut verifier = Verifier::new().unwrap();
+    assert_eq!(verifier.fun(2), Ok(()));
+    assert_eq!(verifier.ret(), Ok(()));
   }
 }
