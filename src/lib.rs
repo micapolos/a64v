@@ -1,5 +1,6 @@
 pub mod a64;
 pub mod asm;
+pub mod compiler;
 pub mod comptime;
 pub mod frame;
 pub mod function;

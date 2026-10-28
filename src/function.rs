@@ -11,18 +11,18 @@ pub enum Reg {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Frame {
-  param_count: usize,
-  regs: [Reg; 32],
-  code: Vec<u32>,
+  pub param_count: usize,
+  pub regs: [Reg; 32],
+  pub code: Vec<u32>,
 }
 
 impl Frame {
-  pub fn new() -> Self {
-   Frame {
-      param_count: 0,
-      regs: [Reg::Undefined; 32],
-      code: Vec::new(),
+  pub fn new(param_count: usize) -> Self {
+    let mut regs = [Reg::Undefined; 32];
+    for i in 0..param_count {
+      regs[i] = Reg::Defined(Type::U64);
     }
+    Self { param_count, regs, code: Vec::new() }
   }
 }
 
@@ -32,6 +32,6 @@ mod tests {
 
   #[test]
   fn test_frame() {
-    let _ = Frame::new();
+    let _ = Frame::new(2);
   }
 }
