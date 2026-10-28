@@ -19,5 +19,5 @@ mod tests {
   }
 }
 
-pub mod token;
 pub mod emitter;
+pub mod token;

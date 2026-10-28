@@ -1,5 +1,4 @@
-use crate::leo::Token;
-use crate::leo::token::Emitter;
+use crate::leo::{Token, token::Emitter};
 
 pub struct Print {
   _private: (),
@@ -19,19 +18,19 @@ impl Emitter for Print {
       Token::Begin(s) => {
         print!("( {}", s);
         Ok(())
-      },
+      }
       Token::Symbol(s) => {
         print!("{} ", s);
         Ok(())
-      },
+      }
       Token::Number(u) => {
         print!("{} ", u);
         Ok(())
-      },
+      }
       Token::End => {
         print!(") ");
         Ok(())
-      },
+      }
     }
   }
 }
