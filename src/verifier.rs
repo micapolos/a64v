@@ -10,6 +10,7 @@ mod verifier {
   }
 }
 
+#[derive(Debug, Default, PartialEq)]
 pub struct Verifier {
   function_frame_option: Option<Box<function::Frame>>,
 }

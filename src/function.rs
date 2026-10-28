@@ -3,13 +3,14 @@ pub enum Type {
   U64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub enum Reg {
+  #[default]
   Undefined,
   Defined(Type),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct Frame {
   pub param_count: usize,
   pub regs: [Reg; 32],
