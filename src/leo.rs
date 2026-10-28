@@ -18,3 +18,6 @@ mod tests {
     let _ = Token::End;
   }
 }
+
+pub mod token;
+pub mod emitter;
