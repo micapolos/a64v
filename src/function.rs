@@ -18,14 +18,6 @@ pub struct Frame {
 }
 
 impl Frame {
-  pub fn empty() -> Self {
-    Self {
-      param_count: 0,
-      regs: [Reg::Undefined; 32],
-      terminated: false,
-    }
-  }
-
   pub fn new(param_count: usize) -> Self {
     let mut regs = [Reg::Undefined; 32];
     for i in 0..param_count {
@@ -42,6 +34,11 @@ impl Frame {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn test_frame_default() {
+    let _ = Frame::default();
+  }
 
   #[test]
   fn test_frame() {
