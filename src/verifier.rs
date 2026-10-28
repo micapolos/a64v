@@ -1,13 +1,32 @@
-use {crate::function, verifier::Error};
+use {crate::function, crate::function::{Reg, Type}, verifier::Error};
 
 mod verifier {
+  use super::*;
+
   #[derive(Debug, PartialEq)]
   pub enum Error {
     AlreadyInFrame,
     MissingFrame,
     InvalidParamCount,
     OutOfMemory,
+    RegisterNotWritable(Register),
   }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Register { index: u8, }
+
+impl Register {
+  pub fn new(index: usize) -> Result<Self, ()> {
+    if index & !0b11111 != 0 {
+      return Err(());
+    }
+    Ok(Register { index: (index & 0b11111) as u8 })
+  }
+
+  pub const R0: Register = Register { index: 0 };
+  pub const R1: Register = Register { index: 1 };
+  pub const R2: Register = Register { index: 2 };
 }
 
 #[derive(Debug, Default, PartialEq)]
@@ -25,6 +44,23 @@ impl Verifier {
     }
     self.function_frame_option =
       Some(Box::new(function::Frame::new(param_count)));
+    Ok(())
+  }
+
+  fn verify_register_writable(&self, register: Register) -> Result<(), Error> {
+    if register.index > 18 {
+      return Err(Error::RegisterNotWritable(register));
+    }
+    Ok(())
+  }
+
+  pub fn movz(&mut self, register: Register, typ: Type) -> Result<(), Error> {
+    self.verify_register_writable(register)?;
+    let function_state = self
+      .function_frame_option
+      .as_mut()
+      .ok_or(Error::MissingFrame)?;
+    function_state.regs[register.index as usize] = Reg::Defined(typ);
     Ok(())
   }
 
