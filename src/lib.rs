@@ -9,4 +9,5 @@ pub mod leo;
 mod op;
 pub mod register;
 pub mod runtime;
+pub mod code;
 pub mod types;
