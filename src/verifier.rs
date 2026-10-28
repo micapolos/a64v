@@ -16,12 +16,6 @@ pub struct Verifier {
 }
 
 impl Verifier {
-  pub fn new() -> Self {
-    Verifier {
-      function_frame_option: None,
-    }
-  }
-
   pub fn fun(&mut self, param_count: usize) -> Result<(), Error> {
     if self.function_frame_option.is_some() {
       return Err(Error::AlreadyInFrame);
@@ -49,19 +43,19 @@ mod tests {
 
   #[test]
   fn test_verifier_invalid_param_count() {
-    let mut verifier = Verifier::new();
+    let mut verifier = Verifier::default();
     assert_eq!(verifier.fun(10), Err(Error::InvalidParamCount));
   }
 
   #[test]
   fn test_verifier_fun() {
-    let mut verifier = Verifier::new();
+    let mut verifier = Verifier::default();
     assert_eq!(verifier.fun(2), Ok(()));
   }
 
   #[test]
   fn test_verifier_fun_ret() {
-    let mut verifier = Verifier::new();
+    let mut verifier = Verifier::default();
     assert_eq!(verifier.fun(2), Ok(()));
     assert_eq!(verifier.ret(), Ok(()));
   }
