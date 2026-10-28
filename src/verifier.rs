@@ -1,7 +1,7 @@
 use {
-  crate::{code, function, jit::Jit},
   verifier::Error,
 };
+use crate::function;
 
 mod verifier {
   #[derive(Debug, PartialEq)]
@@ -14,17 +14,14 @@ mod verifier {
 }
 
 pub struct Verifier {
-  jit: Jit,
   function_frame_option: Option<Box<function::Frame>>,
 }
 
 impl Verifier {
-  pub fn new() -> Result<Self, ()> {
-    let jit = Jit::new(0x10000).ok_or(())?;
-    Ok(Verifier {
-      jit,
+  pub fn new() -> Self {
+    Verifier {
       function_frame_option: None,
-    })
+    }
   }
 
   pub fn fun(&mut self, param_count: usize) -> Result<(), Error> {
@@ -36,23 +33,15 @@ impl Verifier {
     }
     self.function_frame_option = Some(Box::new(function::Frame::new(
       param_count,
-      code::Writer {
-        ptr: self.jit.ptr as *mut u32,
-        left: self.jit.size >> 2,
-      },
     )));
     Ok(())
   }
 
   pub fn ret(&mut self) -> Result<(), Error> {
-    let frame = self
+    let _ = self
       .function_frame_option
       .as_mut()
       .ok_or(Error::MissingFrame)?;
-    frame
-      .code_writer
-      .write(123)
-      .map_err(|_| Error::OutOfMemory)?;
     Ok(())
   }
 }
@@ -63,19 +52,19 @@ mod tests {
 
   #[test]
   fn test_verifier_invalid_param_count() {
-    let mut verifier = Verifier::new().unwrap();
+    let mut verifier = Verifier::new();
     assert_eq!(verifier.fun(10), Err(Error::InvalidParamCount));
   }
 
   #[test]
   fn test_verifier_fun() {
-    let mut verifier = Verifier::new().unwrap();
+    let mut verifier = Verifier::new();
     assert_eq!(verifier.fun(2), Ok(()));
   }
 
   #[test]
   fn test_verifier_fun_ret() {
-    let mut verifier = Verifier::new().unwrap();
+    let mut verifier = Verifier::new();
     assert_eq!(verifier.fun(2), Ok(()));
     assert_eq!(verifier.ret(), Ok(()));
   }
