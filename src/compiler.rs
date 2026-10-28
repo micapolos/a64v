@@ -49,7 +49,10 @@ impl Assembler {
       .function_frame_option
       .as_mut()
       .ok_or(Error::MissingFrame)?;
-    frame.code_writer.write(123).map_err(|_| Error::OutOfMemory)?;
+    frame
+      .code_writer
+      .write(123)
+      .map_err(|_| Error::OutOfMemory)?;
     Ok(())
   }
 }
