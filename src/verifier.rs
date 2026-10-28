@@ -54,13 +54,13 @@ impl Verifier {
     Ok(())
   }
 
-  pub fn movz(&mut self, register: Register, typ: Type) -> Result<(), Error> {
+  pub fn movz(&mut self, register: Register, _value: u16) -> Result<(), Error> {
     self.verify_register_writable(register)?;
     let function_state = self
       .function_frame_option
       .as_mut()
       .ok_or(Error::MissingFrame)?;
-    function_state.regs[register.index as usize] = Reg::Defined(typ);
+    function_state.regs[register.index as usize] = Reg::Defined(Type::U64);
     Ok(())
   }
 
