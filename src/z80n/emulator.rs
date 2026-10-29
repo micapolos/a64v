@@ -212,10 +212,10 @@ impl<IOImpl: IO> Emulator<IOImpl> {
         let r = op::R::decode(op);
         match alu {
           op::Alu::ADD => {
-            self.add_r(R::decode(r));
+            self.add_r(r);
           }
           op::Alu::SUB => {
-            self.sub_r(R::decode(r));
+            self.sub_r(r);
           }
           _ => {}
         }
@@ -250,12 +250,8 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   #[inline]
   pub fn get_r(&self, r: op::R) -> u8 {
     match r {
-      op::R::IMM_HL => {
-        self.io.read(self.z80n.regs.get_rr(RR::HL))
-      }
-      _ => {
-        self.z80n.regs.get_r(R::decode(r))
-      }
+      op::R::IMM_HL => self.io.read(self.z80n.regs.get_rr(RR::HL)),
+      _ => self.z80n.regs.get_r(R::decode(r)),
     }
   }
 
@@ -272,21 +268,24 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   }
 
   #[inline]
-  pub fn ld_r_r(&mut self, r1: R, r2: R) {
-    let regs = &mut self.z80n.regs;
-    regs.set_r(r1, regs.get_r(r2));
+  pub fn ld_r_r(&mut self, r1: op::R, r2: op::R) {
+    self.set_r(r1, self.get_r(r2));
   }
 
   #[inline]
-  pub fn add_r(&mut self, r: R) {
-    let regs = &mut self.z80n.regs;
-    regs.set_r(R::A, regs.get_r(R::A).wrapping_add(regs.get_r(r)));
+  pub fn add_r(&mut self, r: op::R) {
+    self
+      .z80n
+      .regs
+      .set_r(R::A, self.z80n.regs.get_r(R::A).wrapping_add(self.get_r(r)));
   }
 
   #[inline]
-  pub fn sub_r(&mut self, r: R) {
-    let regs = &mut self.z80n.regs;
-    regs.set_r(R::A, regs.get_r(R::A).wrapping_sub(regs.get_r(r)));
+  pub fn sub_r(&mut self, r: op::R) {
+    self
+      .z80n
+      .regs
+      .set_r(R::A, self.z80n.regs.get_r(R::A).wrapping_sub(self.get_r(r)));
   }
 
   #[inline]
