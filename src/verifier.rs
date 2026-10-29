@@ -1,4 +1,10 @@
-use {crate::function, crate::function::{Reg, Type}, verifier::Error};
+use {
+  crate::{
+    function,
+    function::{Reg, Type},
+  },
+  verifier::Error,
+};
 
 mod verifier {
   use super::*;
@@ -14,14 +20,18 @@ mod verifier {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Register { index: u8, }
+pub struct Register {
+  index: u8,
+}
 
 impl Register {
   pub fn new(index: usize) -> Result<Self, ()> {
     if index & !0b11111 != 0 {
       return Err(());
     }
-    Ok(Register { index: (index & 0b11111) as u8 })
+    Ok(Register {
+      index: (index & 0b11111) as u8,
+    })
   }
 
   pub const R0: Register = Register { index: 0 };
