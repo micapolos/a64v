@@ -126,6 +126,7 @@ pub struct Z80N {
   pub regs: Regs,
   pub pc: u16,
   pub sp: u16,
+  pub is_halted: bool,
 }
 
 impl Z80N {
@@ -135,21 +136,22 @@ impl Z80N {
       regs: Regs::new(),
       pc: 0,
       sp: 0,
+      is_halted: false,
     }
   }
 
   #[inline]
-  fn inc_pc(&mut self) {
+  pub fn inc_pc(&mut self) {
     self.pc = self.pc.wrapping_add(1);
   }
 
   #[inline]
-  fn inc_sp(&mut self) {
+  pub fn inc_sp(&mut self) {
     self.sp = self.sp.wrapping_add(1);
   }
 
   #[inline]
-  fn dec_sp(&mut self) {
+  pub fn dec_sp(&mut self) {
     self.sp = self.sp.wrapping_sub(1);
   }
 }
@@ -177,10 +179,28 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
   #[inline]
   pub fn step(&mut self) {
+    if self.z80n.is_halted {
+      return;
+    }
+
     let op = self.fetch();
-    match bits!(op, 3, 3) {
+    match bits!(op, 2, 6) {
+      0b00 => {
+        match bits!(op, 6) {
+          0b000000 => {
+            self.nop();
+          }
+          _ => {}
+        }
+      }
       0b01 => {
-        self.ld_r_r(R::decode(op >> 3), R::decode(op));
+        let r1 = bits!(op, 3, 3);
+        let r2 = bits!(op, 3, 0);
+        if r1 == 0b110 && r2 == 0b110 {
+          self.halt();
+        } else {
+          self.ld_r_r(R::decode(r1), R::decode(r2));
+        }
       }
       0b10 => {
         match bits!(op, 3) {
@@ -202,6 +222,16 @@ impl<IOImpl: IO> Emulator<IOImpl> {
         }
       }
       _ => {}
+    }
+  }
+
+  pub fn run(&mut self, mut max_steps: usize) {
+    while max_steps != 0 {
+      self.step();
+      if self.z80n.is_halted {
+        return;
+      }
+      max_steps -= 1;
     }
   }
 
@@ -250,6 +280,14 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   #[inline]
   fn ret(&mut self) {
     self.z80n.pc = self.pop_nn();
+  }
+
+  #[inline]
+  fn nop(&mut self) {}
+
+  #[inline]
+  fn halt(&mut self) {
+    self.z80n.is_halted = true;
   }
 }
 
@@ -325,10 +363,8 @@ mod tests {
 
   #[test]
   fn test_emulator() {
-    let mem = [0_u8; 0x10000];
-    let mut emulator = Emulator::new(mem);
-    emulator.step();
-    emulator.step();
-    assert_eq!(emulator.z80n.pc, 2);
+    let mut emulator = Emulator::new([0_u8; 0x10000]);
+    emulator.run(123);
+    assert_eq!(emulator.z80n.pc, 123);
   }
 }
