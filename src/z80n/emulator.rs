@@ -112,12 +112,12 @@ impl Regs {
   }
 
   #[inline]
-  fn shift_r(r: R) -> usize {
+  pub fn shift_r(r: R) -> usize {
     r.index() << 3
   }
 
   #[inline]
-  fn shift_rr(rr: RR) -> usize {
+  pub fn shift_rr(rr: RR) -> usize {
     rr.index() << 4
   }
 }
@@ -236,32 +236,32 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   }
 
   #[inline]
-  fn fetch(&mut self) -> u8 {
+  pub fn fetch(&mut self) -> u8 {
     let op = self.io.read(self.z80n.pc);
     self.z80n.inc_pc();
     op
   }
 
   #[inline]
-  fn ld_r_r(&mut self, r1: R, r2: R) {
+  pub fn ld_r_r(&mut self, r1: R, r2: R) {
     let regs = &mut self.z80n.regs;
     regs.set_r(r1, regs.get_r(r2));
   }
 
   #[inline]
-  fn add_r(&mut self, r: R) {
+  pub fn add_r(&mut self, r: R) {
     let regs = &mut self.z80n.regs;
     regs.set_r(R::A, regs.get_r(R::A).wrapping_add(regs.get_r(r)));
   }
 
   #[inline]
-  fn sub_r(&mut self, r: R) {
+  pub fn sub_r(&mut self, r: R) {
     let regs = &mut self.z80n.regs;
     regs.set_r(R::A, regs.get_r(R::A).wrapping_sub(regs.get_r(r)));
   }
 
   #[inline]
-  fn push_nn(&mut self, nn: u16) {
+  pub fn push_nn(&mut self, nn: u16) {
     self.z80n.dec_sp();
     self.io.write(self.z80n.sp, hi(nn));
     self.z80n.dec_sp();
@@ -269,7 +269,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   }
 
   #[inline]
-  fn pop_nn(&mut self) -> u16 {
+  pub fn pop_nn(&mut self) -> u16 {
     let lo = self.io.read(self.z80n.sp);
     self.z80n.inc_sp();
     let hi = self.io.read(self.z80n.sp);
@@ -278,15 +278,15 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   }
 
   #[inline]
-  fn ret(&mut self) {
+  pub fn ret(&mut self) {
     self.z80n.pc = self.pop_nn();
   }
 
   #[inline]
-  fn nop(&mut self) {}
+  pub fn nop(&mut self) {}
 
   #[inline]
-  fn halt(&mut self) {
+  pub fn halt(&mut self) {
     self.z80n.is_halted = true;
   }
 }
