@@ -21,6 +21,23 @@ impl R {
   pub const A: R = R(7);
 }
 
+pub struct RR(u8);
+
+impl RR {
+  pub fn decode(index: u8) -> Self {
+    RR(index & 0b11)
+  }
+
+  pub fn index(&self) -> usize {
+    self.0 as usize
+  }
+
+  pub const BC: RR = RR(0);
+  pub const DE: RR = RR(1);
+  pub const HL: RR = RR(2);
+  pub const AF: RR = RR(3);
+}
+
 pub struct Regs(u64);
 
 impl Regs {
@@ -28,20 +45,34 @@ impl Regs {
     Regs(0)
   }
 
-  pub fn get(&self, r: R) -> u8 {
-    let shift = Self::shift(r);
+  pub fn get_r(&self, r: R) -> u8 {
+    let shift = Self::shift_r(r);
     ((self.0 >> shift) & 0xff) as u8
   }
 
-  pub fn set(&mut self, r: R, n: u8) {
-    let shift = Self::shift(r);
-    let mask = 0xff << shift;
-    self.0 = (self.0 & !mask) | ((n as u64) << shift);
+  pub fn get_rr(&self, rr: RR) -> u16 {
+    let shift = Self::shift_rr(rr);
+    ((self.0 >> shift) & 0xffff) as u16
+  }
+
+  pub fn set_r(&mut self, r: R, n: u8) {
+    let shift = Self::shift_r(r);
+    self.0 = (self.0 & !(0xff << shift)) | ((n as u64) << shift);
+  }
+
+  pub fn set_rr(&mut self, rr: RR, nn: u16) {
+    let shift = Self::shift_rr(rr);
+    self.0 = (self.0 & !(0xffff << shift)) | ((nn as u64) << shift);
   }
 
   #[inline]
-  fn shift(r: R) -> usize {
+  fn shift_r(r: R) -> usize {
     r.index() << 3
+  }
+
+  #[inline]
+  fn shift_rr(rr: RR) -> usize {
+    rr.index() << 4
   }
 }
 
@@ -115,12 +146,12 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
   fn ld_r_r(&mut self, r1: R, r2: R) {
     let regs = &mut self.z80n.regs;
-    regs.set(r1, regs.get(r2));
+    regs.set_r(r1, regs.get_r(r2));
   }
 
   fn add_r(&mut self, r: R) {
     let regs = &mut self.z80n.regs;
-    regs.set(R::A, regs.get(R::A) + regs.get(r));
+    regs.set_r(R::A, regs.get_r(R::A) + regs.get_r(r));
   }
 
   fn ret(&mut self) {
@@ -144,7 +175,38 @@ mod tests {
 
   #[test]
   fn test_regs() {
-    let _ = Regs::new();
+    let mut regs = Regs::new();
+    assert_eq!(regs.get_r(R::B), 0);
+    assert_eq!(regs.get_r(R::C), 0);
+    assert_eq!(regs.get_r(R::D), 0);
+    assert_eq!(regs.get_r(R::E), 0);
+    assert_eq!(regs.get_r(R::H), 0);
+    assert_eq!(regs.get_r(R::L), 0);
+    assert_eq!(regs.get_r(R::F), 0);
+    assert_eq!(regs.get_r(R::A), 0);
+
+    assert_eq!(regs.get_rr(RR::BC), 0);
+    assert_eq!(regs.get_rr(RR::DE), 0);
+    assert_eq!(regs.get_rr(RR::HL), 0);
+    assert_eq!(regs.get_rr(RR::AF), 0);
+
+    regs.set_r(R::B, 0x01);
+    regs.set_r(R::C, 0x23);
+    regs.set_r(R::D, 0x45);
+    regs.set_r(R::E, 0x67);
+    regs.set_r(R::H, 0x89);
+    regs.set_r(R::L, 0xab);
+    regs.set_r(R::F, 0xcd);
+    regs.set_r(R::A, 0xef);
+
+    assert_eq!(regs.get_r(R::B), 0x01);
+    assert_eq!(regs.get_r(R::C), 0x23);
+    assert_eq!(regs.get_r(R::D), 0x45);
+    assert_eq!(regs.get_r(R::E), 0x67);
+    assert_eq!(regs.get_r(R::H), 0x89);
+    assert_eq!(regs.get_r(R::L), 0xab);
+    assert_eq!(regs.get_r(R::F), 0xcd);
+    assert_eq!(regs.get_r(R::A), 0xef);
   }
 
   #[test]
