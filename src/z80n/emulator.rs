@@ -1,15 +1,52 @@
-pub struct GeneralRegisters {
-  pub bcdehlfa: u64,
+use crate::bits;
+
+pub struct R(u8);
+
+impl R {
+  pub fn decode(index: u8) -> Self {
+    R(index & 0b111)
+  }
+
+  pub fn index(&self) -> usize {
+    self.0 as usize
+  }
+
+  pub const B: R = R(0);
+  pub const C: R = R(1);
+  pub const D: R = R(2);
+  pub const E: R = R(3);
+  pub const H: R = R(4);
+  pub const L: R = R(5);
+  pub const F: R = R(6);
+  pub const A: R = R(7);
 }
 
-impl GeneralRegisters {
+pub struct Regs(u64);
+
+impl Regs {
   pub fn new() -> Self {
-    GeneralRegisters { bcdehlfa: 0 }
+    Regs(0)
+  }
+
+  pub fn get(&self, r: R) -> u8 {
+    let shift = Self::shift(r);
+    ((self.0 >> shift) & 0xff) as u8
+  }
+
+  pub fn set(&mut self, r: R, n: u8) {
+    let shift = Self::shift(r);
+    let mask = 0xff << shift;
+    self.0 = (self.0 & !mask) | ((n as u64) << shift);
+  }
+
+  #[inline]
+  fn shift(r: R) -> usize {
+    r.index() << 3
   }
 }
 
 pub struct Z80N {
-  pub general_registers: GeneralRegisters,
+  pub regs: Regs,
   pub pc: u16,
   pub sp: u16,
 }
@@ -17,7 +54,7 @@ pub struct Z80N {
 impl Z80N {
   pub fn new() -> Self {
     Z80N {
-      general_registers: GeneralRegisters::new(),
+      regs: Regs::new(),
       pc: 0,
       sp: 0,
     }
@@ -45,13 +82,49 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   }
 
   pub fn step(&mut self) {
-    let _ = self.fetch();
+    let op = self.fetch();
+    match bits!(op, 3, 3) {
+      0b01 => {
+        self.ld_r_r(R::decode(op >> 3), R::decode(op));
+      }
+      0b10 => {
+        match bits!(op, 3) {
+          0b000 => {
+            self.add_r(R::decode(op));
+          }
+          _ => {}
+        }
+      }
+      0b11 => {
+        match bits!(op, 6) {
+          0b001001 => {
+            self.ret();
+          }
+          _ => {}
+        }
+      }
+      _ => {}
+    }
   }
 
   fn fetch(&mut self) -> u8 {
     let op = self.io.read(self.z80n.pc);
     self.z80n.pc += 1;
     op
+  }
+
+  fn ld_r_r(&mut self, r1: R, r2: R) {
+    let regs = &mut self.z80n.regs;
+    regs.set(r1, regs.get(r2));
+  }
+
+  fn add_r(&mut self, r: R) {
+    let regs = &mut self.z80n.regs;
+    regs.set(R::A, regs.get(R::A) + regs.get(r));
+  }
+
+  fn ret(&mut self) {
+    // TODO
   }
 }
 
@@ -70,8 +143,8 @@ mod tests {
   }
 
   #[test]
-  fn test_general_registers() {
-    let _ = GeneralRegisters::new();
+  fn test_regs() {
+    let _ = Regs::new();
   }
 
   #[test]
