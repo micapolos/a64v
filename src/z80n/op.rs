@@ -1,4 +1,7 @@
 #[derive(Clone, Copy, PartialEq)]
+pub struct Op(u8);
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Category(u8);
 
 impl Category {
