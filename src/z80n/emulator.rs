@@ -186,7 +186,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
     let op = self.fetch();
     match bits!(op, 7..6) {
       0b00 => {
-        match bits!(op, 6) {
+        match bits!(op, 5..0) {
           0b000000 => {
             self.nop();
           }
@@ -194,8 +194,8 @@ impl<IOImpl: IO> Emulator<IOImpl> {
         }
       }
       0b01 => {
-        let r1 = bits!(op, 3, 3);
-        let r2 = bits!(op, 3, 0);
+        let r1 = bits!(op, 5..3);
+        let r2 = bits!(op, 2..0);
         if r1 == 0b110 && r2 == 0b110 {
           self.halt();
         } else {
@@ -203,7 +203,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
         }
       }
       0b10 => {
-        match bits!(op, 3) {
+        match bits!(op, 2..0) {
           0b000 => {
             self.add_r(R::decode(op));
           }
@@ -214,7 +214,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
         }
       }
       0b11 => {
-        match bits!(op, 6) {
+        match bits!(op, 5..0) {
           0b001001 => {
             self.ret();
           }
