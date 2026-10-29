@@ -135,6 +135,9 @@ impl<IOImpl: IO> Emulator<IOImpl> {
           0b000 => {
             self.add_r(R::decode(op));
           }
+          0b010 => {
+            self.sub_r(R::decode(op));
+          }
           _ => {}
         }
       }
