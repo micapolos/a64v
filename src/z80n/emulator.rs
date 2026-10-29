@@ -3,10 +3,12 @@ use crate::bits;
 pub struct R(u8);
 
 impl R {
+  #[inline]
   pub fn decode(index: u8) -> Self {
     R(index & 0b111)
   }
 
+  #[inline]
   pub fn index(&self) -> usize {
     self.0 as usize
   }
@@ -24,10 +26,12 @@ impl R {
 pub struct RR(u8);
 
 impl RR {
+  #[inline]
   pub fn decode(index: u8) -> Self {
     RR(index & 0b11)
   }
 
+  #[inline]
   pub fn index(&self) -> usize {
     self.0 as usize
   }
@@ -41,25 +45,30 @@ impl RR {
 pub struct Regs(u64);
 
 impl Regs {
+  #[inline]
   pub fn new() -> Self {
     Regs(0)
   }
 
+  #[inline]
   pub fn get_r(&self, r: R) -> u8 {
     let shift = Self::shift_r(r);
     ((self.0 >> shift) & 0xff) as u8
   }
 
+  #[inline]
   pub fn get_rr(&self, rr: RR) -> u16 {
     let shift = Self::shift_rr(rr);
     ((self.0 >> shift) & 0xffff) as u16
   }
 
+  #[inline]
   pub fn set_r(&mut self, r: R, n: u8) {
     let shift = Self::shift_r(r);
     self.0 = (self.0 & !(0xff << shift)) | ((n as u64) << shift);
   }
 
+  #[inline]
   pub fn set_rr(&mut self, rr: RR, nn: u16) {
     let shift = Self::shift_rr(rr);
     self.0 = (self.0 & !(0xffff << shift)) | ((nn as u64) << shift);
@@ -83,6 +92,7 @@ pub struct Z80N {
 }
 
 impl Z80N {
+  #[inline]
   pub fn new() -> Self {
     Z80N {
       regs: Regs::new(),
@@ -105,6 +115,7 @@ pub struct Emulator<IOImpl: IO> {
 }
 
 impl<IOImpl: IO> Emulator<IOImpl> {
+  #[inline]
   pub fn new(io: IOImpl) -> Self {
     Emulator {
       z80n: Z80N::new(),
@@ -112,6 +123,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
     }
   }
 
+  #[inline]
   pub fn step(&mut self) {
     let op = self.fetch();
     match bits!(op, 3, 3) {
@@ -138,22 +150,26 @@ impl<IOImpl: IO> Emulator<IOImpl> {
     }
   }
 
+  #[inline]
   fn fetch(&mut self) -> u8 {
     let op = self.io.read(self.z80n.pc);
     self.z80n.pc += 1;
     op
   }
 
+  #[inline]
   fn ld_r_r(&mut self, r1: R, r2: R) {
     let regs = &mut self.z80n.regs;
     regs.set_r(r1, regs.get_r(r2));
   }
 
+  #[inline]
   fn add_r(&mut self, r: R) {
     let regs = &mut self.z80n.regs;
     regs.set_r(R::A, regs.get_r(R::A) + regs.get_r(r));
   }
 
+  #[inline]
   fn ret(&mut self) {
     // TODO
   }
