@@ -10,12 +10,16 @@ impl Op {
     Op(0)
   }
 
+  pub fn ld_r_n(r: R) -> Self {
+    Op((Category::MISC.0 << 6) | (r.0 << 3) | 0b110)
+  }
+
   pub fn ld_r_r(r1: R, r2: R) -> Self {
-    Op(Category::LOAD.0 << 6 | r1.0 << 3 | r2.0)
+    Op((Category::LOAD.0 << 6) | (r1.0 << 3) | r2.0)
   }
 
   pub fn ret() -> Self {
-    Op(Category::CONTROL.0 << 6 | 0b001001)
+    Op((Category::CONTROL.0 << 6) | 0b001001)
   }
 }
 

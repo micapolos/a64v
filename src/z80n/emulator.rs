@@ -24,7 +24,7 @@ pub struct R(u8);
 impl R {
   #[inline]
   pub fn decode(r: op::R) -> Self {
-    R(r.u8() & 0b111)
+    R(r.u8())
   }
 
   #[inline]
@@ -191,10 +191,12 @@ impl<IOImpl: IO> Emulator<IOImpl> {
     }
 
     let op = self.fetch();
-    match Category::decode(op) {
-      Category::MISC => match bits!(op, 5..0) {
-        0b000000 => {
-          self.nop();
+    match Category::decode(op >> 6) {
+      Category::MISC => match bits!(op, 2..0) {
+        0b110 => {
+          let r = op::R::decode(op >> 3);
+          let n = self.fetch();
+          self.set_r(r, n);
         }
         _ => {}
       },
@@ -232,11 +234,11 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
   pub fn run(&mut self, mut max_steps: usize) {
     while max_steps != 0 {
+      max_steps -= 1;
       self.step();
       if self.z80n.is_halted {
         return;
       }
-      max_steps -= 1;
     }
   }
 
@@ -351,6 +353,7 @@ mod tests {
   #[test]
   fn test_regs() {
     let mut regs = Regs::new();
+
     assert_eq!(regs.get_r(R::B), 0);
     assert_eq!(regs.get_r(R::C), 0);
     assert_eq!(regs.get_r(R::D), 0);
@@ -393,11 +396,13 @@ mod tests {
   fn test_emulator() {
     let mut emulator = Emulator::new([0; 0x10000]);
     emulator.io[..3].copy_from_slice(&[
-      Op::nop().u8(),
-      Op::ld_r_r(op::R::A, op::R::IMM_HL).u8(),
-      Op::ret().u8(),
+      Op::ld_r_n(op::R::A).u8(),
+      0x12,
+      Op::ld_r_r(op::R::B, op::R::A).u8(),
     ]);
-    emulator.run(123);
-    assert_eq!(emulator.z80n.pc, 123);
+    emulator.run(2);
+    assert_eq!(emulator.z80n.pc, 3);
+    assert_eq!(emulator.z80n.regs.get_r(R::A), 0x12);
+    assert_eq!(emulator.z80n.regs.get_r(R::B), 0x12);
   }
 }
