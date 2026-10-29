@@ -204,7 +204,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
         if r1 == op::R::IMM_HL && r2 == op::R::IMM_HL {
           self.halt();
         } else {
-          self.ld_r_r(R::decode(r1), R::decode(r2));
+          self.set_r(r1, self.get_r(r2));
         }
       }
       Category::ALU => {
@@ -245,6 +245,30 @@ impl<IOImpl: IO> Emulator<IOImpl> {
     let op = self.io.read(self.z80n.pc);
     self.z80n.inc_pc();
     op
+  }
+
+  #[inline]
+  pub fn get_r(&self, r: op::R) -> u8 {
+    match r {
+      op::R::IMM_HL => {
+        self.io.read(self.z80n.regs.get_rr(RR::HL))
+      }
+      _ => {
+        self.z80n.regs.get_r(R::decode(r))
+      }
+    }
+  }
+
+  #[inline]
+  pub fn set_r(&mut self, r: op::R, n: u8) {
+    match r {
+      op::R::IMM_HL => {
+        self.io.write(self.z80n.regs.get_rr(RR::HL), n);
+      }
+      _ => {
+        self.z80n.regs.set_r(R::decode(r), n);
+      }
+    }
   }
 
   #[inline]
