@@ -1,4 +1,4 @@
-use crate::{bits, z80n::op::Category};
+use crate::{bits, z80n::op::Category, z80n::op};
 
 #[inline]
 pub fn rr(hi: u8, lo: u8) -> u16 {
@@ -20,8 +20,8 @@ pub struct R(u8);
 
 impl R {
   #[inline]
-  pub fn decode(index: u8) -> Self {
-    R(index & 0b111)
+  pub fn decode(r: op::R) -> Self {
+    R(r.u8() & 0b111)
   }
 
   #[inline]
@@ -194,25 +194,29 @@ impl<IOImpl: IO> Emulator<IOImpl> {
           self.nop();
         }
         _ => {}
-      },
+      }
       Category::LOAD => {
-        let r1 = bits!(op, 5..3);
-        let r2 = bits!(op, 2..0);
-        if r1 == 0b110 && r2 == 0b110 {
+        let r1 = op::R::decode(op >> 3);
+        let r2 = op::R::decode(op);
+        if r1 == op::R::IMM_HL && r2 == op::R::IMM_HL {
           self.halt();
         } else {
           self.ld_r_r(R::decode(r1), R::decode(r2));
         }
       }
-      Category::ALU => match bits!(op, 2..0) {
-        0b000 => {
-          self.add_r(R::decode(op));
+      Category::ALU => {
+        let alu =  op::Alu::decode(op >> 3);
+        let r = op::R::decode(op);
+        match alu {
+          op::Alu::ADD => {
+            self.add_r(R::decode(r));
+          }
+          op::Alu::SUB => {
+            self.sub_r(R::decode(r));
+          }
+          _ => {}
         }
-        0b010 => {
-          self.sub_r(R::decode(op));
-        }
-        _ => {}
-      },
+      }
       Category::CONTROL => match bits!(op, 5..0) {
         0b001001 => {
           self.ret();
