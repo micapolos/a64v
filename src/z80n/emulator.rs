@@ -321,7 +321,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+  use {super::*, crate::z80n::op::Op};
 
   #[test]
   fn test_rr() {
@@ -391,7 +391,12 @@ mod tests {
 
   #[test]
   fn test_emulator() {
-    let mut emulator = Emulator::new([0_u8; 0x10000]);
+    let mut emulator = Emulator::new([0; 0x10000]);
+    emulator.io[..3].copy_from_slice(&[
+      Op::nop().u8(),
+      Op::ld_r_r(op::R::A, op::R::IMM_HL).u8(),
+      Op::ret().u8(),
+    ]);
     emulator.run(123);
     assert_eq!(emulator.z80n.pc, 123);
   }

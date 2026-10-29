@@ -1,4 +1,25 @@
 #[derive(Clone, Copy, PartialEq)]
+pub struct Op(u8);
+
+impl Op {
+  pub fn u8(&self) -> u8 {
+    self.0
+  }
+
+  pub fn nop() -> Self {
+    Op(0)
+  }
+
+  pub fn ld_r_r(r1: R, r2: R) -> Self {
+    Op(Category::LOAD.0 << 6 | r1.0 << 3 | r2.0)
+  }
+
+  pub fn ret() -> Self {
+    Op(Category::CONTROL.0 << 6 | 0b001001)
+  }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Category(u8);
 
 impl Category {
