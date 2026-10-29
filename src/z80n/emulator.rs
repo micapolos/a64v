@@ -184,7 +184,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
     }
 
     let op = self.fetch();
-    match bits!(op, 2, 6) {
+    match bits!(op, 7..6) {
       0b00 => {
         match bits!(op, 6) {
           0b000000 => {

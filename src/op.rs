@@ -27,8 +27,19 @@ macro_rules! bits {
     $crate::bits!($expr >> $shift, $bits)
   };
 
+  ($expr:expr, $msb:tt .. $lsb:tt) => {
+    $crate::bits!($expr, ($msb) - ($lsb) + 1, ($lsb))
+  };
+
   ($expr:expr, $bits:expr) => {
     $expr & $crate::mask!($bits)
+  };
+}
+
+#[macro_export]
+macro_rules! bit {
+  ($expr:tt, $bit:tt) => {
+    ($expr >> ($bit)) & 1
   };
 }
 
