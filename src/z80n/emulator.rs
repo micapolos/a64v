@@ -92,23 +92,23 @@ impl Regs {
   }
 
   #[inline]
-  pub fn dec_r(&mut self, r: R) {
-    self.set_r(r, self.get_r(r).wrapping_add(1));
-  }
-
-  #[inline]
   pub fn inc_r(&mut self, r: R) {
     self.set_r(r, self.get_r(r).wrapping_add(1));
   }
 
   #[inline]
-  pub fn dec_rr(&mut self, rr: RR) {
-    self.set_rr(rr, self.get_rr(rr).wrapping_add(1));
+  pub fn dec_r(&mut self, r: R) {
+    self.set_r(r, self.get_r(r).wrapping_sub(1));
   }
 
   #[inline]
   pub fn inc_rr(&mut self, rr: RR) {
     self.set_rr(rr, self.get_rr(rr).wrapping_add(1));
+  }
+
+  #[inline]
+  pub fn dec_rr(&mut self, rr: RR) {
+    self.set_rr(rr, self.get_rr(rr).wrapping_sub(1));
   }
 
   #[inline]
