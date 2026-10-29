@@ -1,5 +1,21 @@
 use crate::bits;
 
+#[inline]
+pub fn rr(hi: u8, lo: u8) -> u16 {
+  (hi as u16) << 8 | (lo as u16)
+}
+
+#[inline]
+pub fn lo(rr: u16) -> u8 {
+  rr as u8
+}
+
+#[inline]
+pub fn hi(rr: u16) -> u8 {
+  lo(rr >> 8)
+}
+
+#[derive(Clone, Copy)]
 pub struct R(u8);
 
 impl R {
@@ -23,6 +39,7 @@ impl R {
   pub const A: R = R(7);
 }
 
+#[derive(Clone, Copy)]
 pub struct RR(u8);
 
 impl RR {
@@ -75,6 +92,26 @@ impl Regs {
   }
 
   #[inline]
+  pub fn dec_r(&mut self, r: R) {
+    self.set_r(r, self.get_r(r).wrapping_add(1));
+  }
+
+  #[inline]
+  pub fn inc_r(&mut self, r: R) {
+    self.set_r(r, self.get_r(r).wrapping_add(1));
+  }
+
+  #[inline]
+  pub fn dec_rr(&mut self, rr: RR) {
+    self.set_rr(rr, self.get_rr(rr).wrapping_add(1));
+  }
+
+  #[inline]
+  pub fn inc_rr(&mut self, rr: RR) {
+    self.set_rr(rr, self.get_rr(rr).wrapping_add(1));
+  }
+
+  #[inline]
   fn shift_r(r: R) -> usize {
     r.index() << 3
   }
@@ -99,6 +136,21 @@ impl Z80N {
       pc: 0,
       sp: 0,
     }
+  }
+
+  #[inline]
+  fn inc_pc(&mut self) {
+    self.pc = self.pc.wrapping_add(1);
+  }
+
+  #[inline]
+  fn inc_sp(&mut self) {
+    self.sp = self.sp.wrapping_add(1);
+  }
+
+  #[inline]
+  fn dec_sp(&mut self) {
+    self.sp = self.sp.wrapping_sub(1);
   }
 }
 
@@ -156,7 +208,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   #[inline]
   fn fetch(&mut self) -> u8 {
     let op = self.io.read(self.z80n.pc);
-    self.z80n.pc += 1;
+    self.z80n.inc_pc();
     op
   }
 
@@ -179,14 +231,46 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   }
 
   #[inline]
+  fn push_nn(&mut self, nn: u16) {
+    self.z80n.dec_sp();
+    self.io.write(self.z80n.sp, hi(nn));
+    self.z80n.dec_sp();
+    self.io.write(self.z80n.sp, lo(nn));
+  }
+
+  #[inline]
+  fn pop_nn(&mut self) -> u16 {
+    let lo = self.io.read(self.z80n.sp);
+    self.z80n.inc_sp();
+    let hi = self.io.read(self.z80n.sp);
+    self.z80n.inc_sp();
+    rr(hi, lo)
+  }
+
+  #[inline]
   fn ret(&mut self) {
-    // TODO
+    self.z80n.pc = self.pop_nn();
   }
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn test_rr() {
+    assert_eq!(rr(0x12, 0x34), 0x1234);
+  }
+
+  #[test]
+  fn test_lo() {
+    assert_eq!(lo(0x1234), 0x34);
+  }
+
+  #[test]
+  fn test_hi() {
+    assert_eq!(hi(0x1234), 0x12);
+  }
 
   impl IO for [u8; 0x10000] {
     fn read(&self, address: u16) -> u8 {
