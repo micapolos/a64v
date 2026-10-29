@@ -1,4 +1,7 @@
-use crate::{bits, z80n::op::Category, z80n::op};
+use crate::{
+  bits,
+  z80n::{op, op::Category},
+};
 
 #[inline]
 pub fn rr(hi: u8, lo: u8) -> u16 {
@@ -194,7 +197,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
           self.nop();
         }
         _ => {}
-      }
+      },
       Category::LOAD => {
         let r1 = op::R::decode(op >> 3);
         let r2 = op::R::decode(op);
@@ -205,7 +208,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
         }
       }
       Category::ALU => {
-        let alu =  op::Alu::decode(op >> 3);
+        let alu = op::Alu::decode(op >> 3);
         let r = op::R::decode(op);
         match alu {
           op::Alu::ADD => {

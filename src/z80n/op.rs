@@ -60,4 +60,3 @@ impl Alu {
   pub const XOR: Self = Self(6);
   pub const CP: Self = Self(7);
 }
-
