@@ -3,10 +3,10 @@ use crate::{
   bit::Bit,
   bits,
   z80n::{
-    value::{hl, l, h},
     cpu::{IO, Z80N},
     op,
     reg::{R, RR},
+    value::{h, hl, l},
   },
 };
 
