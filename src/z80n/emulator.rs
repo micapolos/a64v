@@ -289,18 +289,18 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
   #[inline]
   pub fn add_r(&mut self, r: op::R) {
-    self
-      .z80n
-      .regs
-      .set_r(R::A, self.z80n.regs.get_r(R::A).wrapping_add(self.get_r(r)));
+    let n = self.get_r(r);
+    let mut a = self.z80n.regs.get_r(R::A);
+    a = a.wrapping_add(n);
+    self.z80n.regs.set_r(R::A, a);
   }
 
   #[inline]
   pub fn sub_r(&mut self, r: op::R) {
-    self
-      .z80n
-      .regs
-      .set_r(R::A, self.z80n.regs.get_r(R::A).wrapping_sub(self.get_r(r)));
+    let n = self.get_r(r);
+    let mut a = self.z80n.regs.get_r(R::A);
+    a = a.wrapping_sub(n);
+    self.z80n.regs.set_r(R::A, a);
   }
 
   #[inline]
