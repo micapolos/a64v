@@ -193,14 +193,22 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
     let op = self.fetch();
     match Category::decode(op >> 6) {
-      Category::MISC => match bits!(op, 2..0) {
-        0b110 => {
-          let r = op::R::decode(op >> 3);
-          let n = self.fetch();
-          self.set_r(r, n);
+      Category::MISC => {
+        let r = op::R::decode(op >> 3);
+        match bits!(op, 2..0) {
+          0b100 => {
+            self.inc_r(r);
+          }
+          0b101 => {
+            self.dec_r(r);
+          }
+          0b110 => {
+            let n = self.fetch();
+            self.set_r(r, n);
+          }
+          _ => {}
         }
-        _ => {}
-      },
+      }
       Category::LOAD => {
         let r1 = op::R::decode(op >> 3);
         let r2 = op::R::decode(op);
@@ -223,22 +231,18 @@ impl<IOImpl: IO> Emulator<IOImpl> {
           _ => {}
         }
       }
-      Category::CONTROL => {
-        match bits!(op, 2..0) {
-          0b111 => {
-            self.rst(op & 0b111000);
-          }
+      Category::CONTROL => match bits!(op, 2..0) {
+        0b111 => {
+          self.rst(op & 0b111000);
+        }
+        0b001 => match bits!(op, 5..3) {
           0b001 => {
-            match bits!(op, 5..3) {
-              0b001 => {
-                self.ret();
-              }
-              _ => {}
-            }
+            self.ret();
           }
           _ => {}
-        }
-      }
+        },
+        _ => {}
+      },
       _ => {}
     }
   }
@@ -297,6 +301,16 @@ impl<IOImpl: IO> Emulator<IOImpl> {
       .z80n
       .regs
       .set_r(R::A, self.z80n.regs.get_r(R::A).wrapping_sub(self.get_r(r)));
+  }
+
+  #[inline]
+  pub fn inc_r(&mut self, r: op::R) {
+    self.set_r(r, self.get_r(r).wrapping_add(1));
+  }
+
+  #[inline]
+  pub fn dec_r(&mut self, r: op::R) {
+    self.set_r(r, self.get_r(r).wrapping_sub(1));
   }
 
   #[inline]
