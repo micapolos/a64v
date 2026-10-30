@@ -10,6 +10,10 @@ impl Op {
     Op(0)
   }
 
+  pub fn halt() -> Self {
+    Op((Category::LOAD.0 << 6) | (0b110 << 3) | 0b110)
+  }
+
   pub fn ld_r_n(r: R) -> Self {
     Op((Category::MISC.0 << 6) | (r.0 << 3) | 0b110)
   }

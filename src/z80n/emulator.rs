@@ -168,7 +168,7 @@ pub trait IO {
     0
   }
   fn output(&mut self, _address: u16, _value: u8) {}
-  fn halt(&mut self, z80n: &mut Z80N) {}
+  fn halt(&mut self, _z80n: &mut Z80N) {}
 }
 
 pub struct Emulator<IOImpl: IO> {
@@ -233,19 +233,17 @@ impl<IOImpl: IO> Emulator<IOImpl> {
     }
   }
 
-  pub fn run(&mut self, mut max_steps: usize) {
-    while max_steps != 0 {
-      max_steps -= 1;
+  pub fn run(&mut self) {
+    while !self.z80n.is_halted {
       self.step();
-      if self.z80n.is_halted {
-        return;
-      }
     }
   }
 
   #[inline]
   pub fn fetch(&mut self) -> u8 {
     let op = self.io.read(self.z80n.pc);
+    // std::thread::sleep(std::time::Duration::from_millis(500));
+    // println!("Fetched 0x{:04X}: 0x{:02X}", self.z80n.pc, op);
     self.z80n.inc_pc();
     op
   }
@@ -318,13 +316,37 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
   #[inline]
   pub fn halt(&mut self) {
-    self.z80n.is_halted = true;
+    if self.z80n.pc == 8 {
+      self.io.halt(&mut self.z80n);
+    } else {
+      self.z80n.is_halted = true;
+    }
   }
 }
 
 #[cfg(test)]
 mod tests {
   use {super::*, crate::z80n::op::Op};
+
+  struct TestIO {
+    pub mem: [u8; 0x10000],
+  }
+
+  impl IO for TestIO {
+    fn read(&self, address: u16) -> u8 {
+      self.mem[address as usize]
+    }
+
+    fn write(&mut self, address: u16, value: u8) {
+      self.mem[address as usize] = value;
+    }
+
+    fn halt(&mut self, z80n: &mut Z80N) {
+      if z80n.pc == 8 {
+        println!("Rust hook {}!!!", z80n.regs.get_r(R::A));
+      }
+    }
+  }
 
   #[test]
   fn test_rr() {
@@ -339,16 +361,6 @@ mod tests {
   #[test]
   fn test_hi() {
     assert_eq!(hi(0x1234), 0x12);
-  }
-
-  impl IO for [u8; 0x10000] {
-    fn read(&self, address: u16) -> u8 {
-      self[address as usize]
-    }
-
-    fn write(&mut self, address: u16, value: u8) {
-      self[address as usize] = value;
-    }
   }
 
   #[test]
@@ -395,14 +407,19 @@ mod tests {
 
   #[test]
   fn test_emulator() {
-    let mut emulator = Emulator::new([0; 0x10000]);
-    emulator.io[..3].copy_from_slice(&[
+    let io = TestIO {
+      mem: [0u8; 0x10000],
+    };
+    let mut emulator = Emulator::new(io);
+    emulator.io.mem[0x100..0x104].copy_from_slice(&[
       Op::ld_r_n(op::R::A).u8(),
       0x12,
       Op::ld_r_r(op::R::B, op::R::A).u8(),
+      Op::halt().u8(),
     ]);
-    emulator.run(2);
-    assert_eq!(emulator.z80n.pc, 3);
+    emulator.z80n.pc = 0x100;
+    emulator.run();
+    assert_eq!(emulator.z80n.pc, 0x104);
     assert_eq!(emulator.z80n.regs.get_r(R::A), 0x12);
     assert_eq!(emulator.z80n.regs.get_r(R::B), 0x12);
   }
