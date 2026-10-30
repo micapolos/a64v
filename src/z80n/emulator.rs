@@ -1,7 +1,4 @@
-use crate::{
-  bits,
-  z80n::{op, op::Category},
-};
+use crate::{bit, bit::Bit, bits, z80n::op};
 
 #[inline]
 pub fn rr(hi: u8, lo: u8) -> u16 {
@@ -192,58 +189,61 @@ impl<IOImpl: IO> Emulator<IOImpl> {
     }
 
     let op = self.fetch();
-    match Category::decode(op >> 6) {
-      Category::MISC => {
-        let r = op::R::decode(op >> 3);
-        match bits!(op, 2..0) {
-          0b100 => {
-            self.inc_r(r);
+    match bit!(op, 7) {
+      Bit::Zero => match bit!(op, 6) {
+        Bit::Zero => {
+          let r = op::R::decode(op >> 3);
+          match bits!(op, 2..0) {
+            0b100 => {
+              self.inc_r(r);
+            }
+            0b101 => {
+              self.dec_r(r);
+            }
+            0b110 => {
+              let n = self.fetch();
+              self.set_r(r, n);
+            }
+            _ => {}
           }
-          0b101 => {
-            self.dec_r(r);
-          }
-          0b110 => {
-            let n = self.fetch();
-            self.set_r(r, n);
-          }
-          _ => {}
         }
-      }
-      Category::LOAD => {
-        let r1 = op::R::decode(op >> 3);
-        let r2 = op::R::decode(op);
-        if r1 == op::R::IMM_HL && r2 == op::R::IMM_HL {
-          self.halt();
-        } else {
-          self.set_r(r1, self.get_r(r2));
-        }
-      }
-      Category::ALU => {
-        let alu = op::Alu::decode(op >> 3);
-        let r = op::R::decode(op);
-        match alu {
-          op::Alu::ADD => {
-            self.add_r(r);
+        Bit::One => {
+          let r1 = op::R::decode(op >> 3);
+          let r2 = op::R::decode(op);
+          if r1 == op::R::IMM_HL && r2 == op::R::IMM_HL {
+            self.halt();
+          } else {
+            self.set_r(r1, self.get_r(r2));
           }
-          op::Alu::SUB => {
-            self.sub_r(r);
-          }
-          _ => {}
         }
-      }
-      Category::CONTROL => match bits!(op, 2..0) {
-        0b111 => {
-          self.rst(op & 0b111000);
-        }
-        0b001 => match bits!(op, 5..3) {
-          0b001 => {
-            self.ret();
+      },
+      Bit::One => match bit!(op, 6) {
+        Bit::Zero => {
+          let alu = op::Alu::decode(op >> 3);
+          let r = op::R::decode(op);
+          match alu {
+            op::Alu::ADD => {
+              self.add_r(r);
+            }
+            op::Alu::SUB => {
+              self.sub_r(r);
+            }
+            _ => {}
           }
+        }
+        Bit::One => match bits!(op, 2..0) {
+          0b111 => {
+            self.rst(op & 0b111000);
+          }
+          0b001 => match bits!(op, 5..3) {
+            0b001 => {
+              self.ret();
+            }
+            _ => {}
+          },
           _ => {}
         },
-        _ => {}
       },
-      _ => {}
     }
   }
 

@@ -36,13 +36,6 @@ macro_rules! bits {
   };
 }
 
-#[macro_export]
-macro_rules! bit {
-  ($expr:tt, $bit:tt) => {
-    ($expr >> ($bit)) & 1
-  };
-}
-
 #[cfg(test)]
 mod tests {
   #[test]

@@ -12,4 +12,5 @@ pub mod runtime;
 pub mod types;
 pub mod verifier;
 
+pub mod bit;
 pub mod z80n;
