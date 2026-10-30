@@ -106,3 +106,45 @@ impl Regs {
     rr.index() << 4
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_regs() {
+    let mut regs = Regs::new();
+
+    assert_eq!(regs.get_r(R::B), 0);
+    assert_eq!(regs.get_r(R::C), 0);
+    assert_eq!(regs.get_r(R::D), 0);
+    assert_eq!(regs.get_r(R::E), 0);
+    assert_eq!(regs.get_r(R::H), 0);
+    assert_eq!(regs.get_r(R::L), 0);
+    assert_eq!(regs.get_r(R::F), 0);
+    assert_eq!(regs.get_r(R::A), 0);
+
+    assert_eq!(regs.get_rr(RR::BC), 0);
+    assert_eq!(regs.get_rr(RR::DE), 0);
+    assert_eq!(regs.get_rr(RR::HL), 0);
+    assert_eq!(regs.get_rr(RR::AF), 0);
+
+    regs.set_r(R::B, 0x01);
+    regs.set_r(R::C, 0x23);
+    regs.set_r(R::D, 0x45);
+    regs.set_r(R::E, 0x67);
+    regs.set_r(R::H, 0x89);
+    regs.set_r(R::L, 0xab);
+    regs.set_r(R::F, 0xcd);
+    regs.set_r(R::A, 0xef);
+
+    assert_eq!(regs.get_r(R::B), 0x01);
+    assert_eq!(regs.get_r(R::C), 0x23);
+    assert_eq!(regs.get_r(R::D), 0x45);
+    assert_eq!(regs.get_r(R::E), 0x67);
+    assert_eq!(regs.get_r(R::H), 0x89);
+    assert_eq!(regs.get_r(R::L), 0xab);
+    assert_eq!(regs.get_r(R::F), 0xcd);
+    assert_eq!(regs.get_r(R::A), 0xef);
+  }
+}
