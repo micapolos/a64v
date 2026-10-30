@@ -168,6 +168,7 @@ pub trait IO {
     0
   }
   fn output(&mut self, _address: u16, _value: u8) {}
+  fn halt(&mut self, z80n: &mut Z80N) {}
 }
 
 pub struct Emulator<IOImpl: IO> {
