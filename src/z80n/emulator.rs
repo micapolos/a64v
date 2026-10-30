@@ -3,26 +3,12 @@ use crate::{
   bit::Bit,
   bits,
   z80n::{
+    value::{hl, l, h},
     cpu::{IO, Z80N},
     op,
     reg::{R, RR},
   },
 };
-
-#[inline]
-pub fn rr(hi: u8, lo: u8) -> u16 {
-  (hi as u16) << 8 | (lo as u16)
-}
-
-#[inline]
-pub fn lo(rr: u16) -> u8 {
-  rr as u8
-}
-
-#[inline]
-pub fn hi(rr: u16) -> u8 {
-  lo(rr >> 8)
-}
 
 pub struct Emulator<IOImpl: IO> {
   pub z80n: Z80N,
@@ -172,18 +158,18 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   #[inline]
   pub fn push_nn(&mut self, nn: u16) {
     self.z80n.dec_sp();
-    self.io.write(self.z80n.sp, hi(nn));
+    self.io.write(self.z80n.sp, h(nn));
     self.z80n.dec_sp();
-    self.io.write(self.z80n.sp, lo(nn));
+    self.io.write(self.z80n.sp, l(nn));
   }
 
   #[inline]
   pub fn pop_nn(&mut self) -> u16 {
-    let lo = self.io.read(self.z80n.sp);
+    let l = self.io.read(self.z80n.sp);
     self.z80n.inc_sp();
-    let hi = self.io.read(self.z80n.sp);
+    let h = self.io.read(self.z80n.sp);
     self.z80n.inc_sp();
-    rr(hi, lo)
+    hl(h, l)
   }
 
   #[inline]
@@ -242,21 +228,6 @@ mod tests {
         z80n.is_halted = false;
       }
     }
-  }
-
-  #[test]
-  fn test_rr() {
-    assert_eq!(rr(0x12, 0x34), 0x1234);
-  }
-
-  #[test]
-  fn test_lo() {
-    assert_eq!(lo(0x1234), 0x34);
-  }
-
-  #[test]
-  fn test_hi() {
-    assert_eq!(hi(0x1234), 0x12);
   }
 
   #[test]
