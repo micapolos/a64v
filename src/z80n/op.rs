@@ -25,6 +25,10 @@ impl Op {
   pub fn ret() -> Self {
     Op((Category::CONTROL.0 << 6) | 0b001001)
   }
+
+  pub fn rst(n: u8) -> Self {
+    Op((Category::CONTROL.0 << 6) | (n & 0b111000) | 0b111)
+  }
 }
 
 #[derive(Clone, Copy, PartialEq)]

@@ -223,12 +223,22 @@ impl<IOImpl: IO> Emulator<IOImpl> {
           _ => {}
         }
       }
-      Category::CONTROL => match bits!(op, 5..0) {
-        0b001001 => {
-          self.ret();
+      Category::CONTROL => {
+        match bits!(op, 2..0) {
+          0b111 => {
+            self.rst(op & 0b111000);
+          }
+          0b001 => {
+            match bits!(op, 5..3) {
+              0b001 => {
+                self.ret();
+              }
+              _ => {}
+            }
+          }
+          _ => {}
         }
-        _ => {}
-      },
+      }
       _ => {}
     }
   }
@@ -312,11 +322,16 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   }
 
   #[inline]
+  pub fn rst(&mut self, n: u8) {
+    self.z80n.pc = n as u16;
+  }
+
+  #[inline]
   pub fn nop(&mut self) {}
 
   #[inline]
   pub fn halt(&mut self) {
-    if self.z80n.pc == 8 {
+    if self.z80n.pc == 9 {
       self.io.halt(&mut self.z80n);
     } else {
       self.z80n.is_halted = true;
@@ -330,6 +345,16 @@ mod tests {
 
   struct TestIO {
     pub mem: [u8; 0x10000],
+    pub did_call_hook: bool,
+  }
+
+  impl TestIO {
+    fn new() -> Self {
+      TestIO {
+        mem: [0; 0x10000],
+        did_call_hook: false,
+      }
+    }
   }
 
   impl IO for TestIO {
@@ -342,9 +367,7 @@ mod tests {
     }
 
     fn halt(&mut self, z80n: &mut Z80N) {
-      if z80n.pc == 8 {
-        println!("Rust hook {}!!!", z80n.regs.get_r(R::A));
-      }
+      self.did_call_hook = true;
     }
   }
 
@@ -406,21 +429,35 @@ mod tests {
   }
 
   #[test]
-  fn test_emulator() {
-    let io = TestIO {
-      mem: [0u8; 0x10000],
-    };
-    let mut emulator = Emulator::new(io);
-    emulator.io.mem[0x100..0x104].copy_from_slice(&[
-      Op::ld_r_n(op::R::A).u8(),
-      0x12,
-      Op::ld_r_r(op::R::B, op::R::A).u8(),
-      Op::halt().u8(),
-    ]);
+  fn test_emulator_halt() {
+    let mut emulator = Emulator::new(TestIO::new());
+    emulator.io.mem[0x100] = Op::halt().u8();
     emulator.z80n.pc = 0x100;
     emulator.run();
-    assert_eq!(emulator.z80n.pc, 0x104);
+    assert_eq!(emulator.io.did_call_hook, false);
+    assert_eq!(emulator.z80n.pc, 0x101);
+  }
+
+  #[test]
+  fn test_emulator_hook() {
+    let mut emulator = Emulator::new(TestIO::new());
+    emulator.io.mem[0x8] = Op::halt().u8();
+    emulator.io.mem[0x9] = Op::halt().u8();
+    emulator.z80n.pc = 0x0a;
+    emulator.run();
+    assert_eq!(emulator.io.did_call_hook, true);
+    assert_eq!(emulator.z80n.pc, 0x0a);
+  }
+
+  #[test]
+  fn test_emulator_add() {
+    let mut emulator = Emulator::new(TestIO::new());
+    emulator.io.mem[0x100] = Op::ld_r_n(op::R::A).u8();
+    emulator.io.mem[0x101] = 0x12;
+    emulator.io.mem[0x102] = Op::halt().u8();
+    emulator.z80n.pc = 0x100;
+    emulator.run();
+    assert_eq!(emulator.z80n.pc, 0x103);
     assert_eq!(emulator.z80n.regs.get_r(R::A), 0x12);
-    assert_eq!(emulator.z80n.regs.get_r(R::B), 0x12);
   }
 }
