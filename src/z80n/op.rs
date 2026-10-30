@@ -11,39 +11,24 @@ impl Op {
   }
 
   pub fn halt() -> Self {
-    Op((Category::LOAD.0 << 6) | (0b110 << 3) | 0b110)
+    Op(0b01_110_110)
   }
 
   pub fn ld_r_n(r: R) -> Self {
-    Op((Category::MISC.0 << 6) | (r.0 << 3) | 0b110)
+    Op((0b00 << 6) | (r.0 << 3) | 0b110)
   }
 
   pub fn ld_r_r(r1: R, r2: R) -> Self {
-    Op((Category::LOAD.0 << 6) | (r1.0 << 3) | r2.0)
+    Op((0b01 << 6) | (r1.0 << 3) | r2.0)
   }
 
   pub fn ret() -> Self {
-    Op((Category::CONTROL.0 << 6) | 0b001001)
+    Op((0b11 << 6) | 0b001001)
   }
 
   pub fn rst(n: u8) -> Self {
-    Op((Category::CONTROL.0 << 6) | (n & 0b111000) | 0b111)
+    Op((0b11 << 6) | (n & 0b111000) | 0b111)
   }
-}
-
-#[derive(Clone, Copy, PartialEq)]
-pub struct Category(u8);
-
-impl Category {
-  #[inline]
-  pub fn decode(op: u8) -> Self {
-    Self(op & 0b11)
-  }
-
-  pub const MISC: Self = Self(0b00);
-  pub const LOAD: Self = Self(0b01);
-  pub const ALU: Self = Self(0b10);
-  pub const CONTROL: Self = Self(0b11);
 }
 
 #[derive(Clone, Copy, PartialEq)]
