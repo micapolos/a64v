@@ -331,11 +331,8 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
   #[inline]
   pub fn halt(&mut self) {
-    if self.z80n.pc == 9 {
-      self.io.halt(&mut self.z80n);
-    } else {
-      self.z80n.is_halted = true;
-    }
+    self.z80n.is_halted = true;
+    self.io.halt(&mut self.z80n);
   }
 }
 
@@ -367,7 +364,10 @@ mod tests {
     }
 
     fn halt(&mut self, z80n: &mut Z80N) {
-      self.did_call_hook = true;
+      if z80n.pc == 9 {
+        self.did_call_hook = true;
+        z80n.is_halted = false;
+      }
     }
   }
 
