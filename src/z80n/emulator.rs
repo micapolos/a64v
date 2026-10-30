@@ -3,7 +3,7 @@ use crate::{
   bit::Bit,
   bits,
   z80n::{
-    cpu::Z80N,
+    cpu::Cpu,
     op,
     reg::{R, RR},
     value::{h, hl, l},
@@ -19,11 +19,11 @@ pub trait IO {
     0
   }
   fn output(&mut self, _address: u16, _value: u8) {}
-  fn halt(&mut self, _z80n: &mut Z80N) {}
+  fn halt(&mut self, _z80n: &mut Cpu) {}
 }
 
 pub struct Emulator<IOImpl: IO> {
-  pub z80n: Z80N,
+  pub cpu: Cpu,
   pub io: IOImpl,
 }
 
@@ -31,14 +31,14 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   #[inline]
   pub fn new(io: IOImpl) -> Self {
     Emulator {
-      z80n: Z80N::new(),
+      cpu: Cpu::new(),
       io,
     }
   }
 
   #[inline]
   pub fn step(&mut self) {
-    if self.z80n.is_halted {
+    if self.cpu.is_halted {
       return;
     }
 
@@ -102,25 +102,25 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   }
 
   pub fn run(&mut self) {
-    while !self.z80n.is_halted {
+    while !self.cpu.is_halted {
       self.step();
     }
   }
 
   #[inline]
   pub fn fetch(&mut self) -> u8 {
-    let op = self.io.read(self.z80n.pc);
+    let op = self.io.read(self.cpu.pc);
     // std::thread::sleep(std::time::Duration::from_millis(500));
-    // println!("Fetched 0x{:04X}: 0x{:02X}", self.z80n.pc, op);
-    self.z80n.inc_pc();
+    // println!("Fetched 0x{:04X}: 0x{:02X}", self.cpu.pc, op);
+    self.cpu.inc_pc();
     op
   }
 
   #[inline]
   pub fn get_r(&self, r: op::R) -> u8 {
     match r {
-      op::R::IMM_HL => self.io.read(self.z80n.regs.get_rr(RR::HL)),
-      _ => self.z80n.regs.get_r(R::decode(r)),
+      op::R::IMM_HL => self.io.read(self.cpu.regs.get_rr(RR::HL)),
+      _ => self.cpu.regs.get_r(R::decode(r)),
     }
   }
 
@@ -128,10 +128,10 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   pub fn set_r(&mut self, r: op::R, n: u8) {
     match r {
       op::R::IMM_HL => {
-        self.io.write(self.z80n.regs.get_rr(RR::HL), n);
+        self.io.write(self.cpu.regs.get_rr(RR::HL), n);
       }
       _ => {
-        self.z80n.regs.set_r(R::decode(r), n);
+        self.cpu.regs.set_r(R::decode(r), n);
       }
     }
   }
@@ -144,17 +144,17 @@ impl<IOImpl: IO> Emulator<IOImpl> {
   #[inline]
   pub fn add_r(&mut self, r: op::R) {
     let n = self.get_r(r);
-    let mut a = self.z80n.regs.get_r(R::A);
+    let mut a = self.cpu.regs.get_r(R::A);
     a = a.wrapping_add(n);
-    self.z80n.regs.set_r(R::A, a);
+    self.cpu.regs.set_r(R::A, a);
   }
 
   #[inline]
   pub fn sub_r(&mut self, r: op::R) {
     let n = self.get_r(r);
-    let mut a = self.z80n.regs.get_r(R::A);
+    let mut a = self.cpu.regs.get_r(R::A);
     a = a.wrapping_sub(n);
-    self.z80n.regs.set_r(R::A, a);
+    self.cpu.regs.set_r(R::A, a);
   }
 
   #[inline]
@@ -169,29 +169,29 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
   #[inline]
   pub fn push_nn(&mut self, nn: u16) {
-    self.z80n.dec_sp();
-    self.io.write(self.z80n.sp, h(nn));
-    self.z80n.dec_sp();
-    self.io.write(self.z80n.sp, l(nn));
+    self.cpu.dec_sp();
+    self.io.write(self.cpu.sp, h(nn));
+    self.cpu.dec_sp();
+    self.io.write(self.cpu.sp, l(nn));
   }
 
   #[inline]
   pub fn pop_nn(&mut self) -> u16 {
-    let l = self.io.read(self.z80n.sp);
-    self.z80n.inc_sp();
-    let h = self.io.read(self.z80n.sp);
-    self.z80n.inc_sp();
+    let l = self.io.read(self.cpu.sp);
+    self.cpu.inc_sp();
+    let h = self.io.read(self.cpu.sp);
+    self.cpu.inc_sp();
     hl(h, l)
   }
 
   #[inline]
   pub fn ret(&mut self) {
-    self.z80n.pc = self.pop_nn();
+    self.cpu.pc = self.pop_nn();
   }
 
   #[inline]
   pub fn rst(&mut self, n: u8) {
-    self.z80n.pc = n as u16;
+    self.cpu.pc = n as u16;
   }
 
   #[inline]
@@ -199,8 +199,8 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
   #[inline]
   pub fn halt(&mut self) {
-    self.z80n.is_halted = true;
-    self.io.halt(&mut self.z80n);
+    self.cpu.is_halted = true;
+    self.io.halt(&mut self.cpu);
   }
 }
 
@@ -231,7 +231,7 @@ mod tests {
       self.mem[address as usize] = value;
     }
 
-    fn halt(&mut self, z80n: &mut Z80N) {
+    fn halt(&mut self, z80n: &mut Cpu) {
       if z80n.pc == 9 {
         self.did_call_hook = true;
         z80n.is_halted = false;
@@ -243,10 +243,10 @@ mod tests {
   fn test_emulator_halt() {
     let mut emulator = Emulator::new(TestIO::new());
     emulator.io.mem[0x100] = Op::halt().u8();
-    emulator.z80n.pc = 0x100;
+    emulator.cpu.pc = 0x100;
     emulator.run();
     assert_eq!(emulator.io.did_call_hook, false);
-    assert_eq!(emulator.z80n.pc, 0x101);
+    assert_eq!(emulator.cpu.pc, 0x101);
   }
 
   #[test]
@@ -254,10 +254,10 @@ mod tests {
     let mut emulator = Emulator::new(TestIO::new());
     emulator.io.mem[0x8] = Op::halt().u8();
     emulator.io.mem[0x9] = Op::halt().u8();
-    emulator.z80n.pc = 0x0a;
+    emulator.cpu.pc = 0x0a;
     emulator.run();
     assert_eq!(emulator.io.did_call_hook, true);
-    assert_eq!(emulator.z80n.pc, 0x0a);
+    assert_eq!(emulator.cpu.pc, 0x0a);
   }
 
   #[test]
@@ -266,9 +266,9 @@ mod tests {
     emulator.io.mem[0x100] = Op::ld_r_n(op::R::A).u8();
     emulator.io.mem[0x101] = 0x12;
     emulator.io.mem[0x102] = Op::halt().u8();
-    emulator.z80n.pc = 0x100;
+    emulator.cpu.pc = 0x100;
     emulator.run();
-    assert_eq!(emulator.z80n.pc, 0x103);
-    assert_eq!(emulator.z80n.regs.get_r(R::A), 0x12);
+    assert_eq!(emulator.cpu.pc, 0x103);
+    assert_eq!(emulator.cpu.regs.get_r(R::A), 0x12);
   }
 }

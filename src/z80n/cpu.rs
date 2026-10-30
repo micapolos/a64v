@@ -1,16 +1,16 @@
 use crate::z80n::reg::Regs;
 
-pub struct Z80N {
+pub struct Cpu {
   pub regs: Regs,
   pub pc: u16,
   pub sp: u16,
   pub is_halted: bool,
 }
 
-impl Z80N {
+impl Cpu {
   #[inline]
   pub fn new() -> Self {
-    Z80N {
+    Cpu {
       regs: Regs::new(),
       pc: 0,
       sp: 0,
@@ -40,6 +40,6 @@ mod tests {
 
   #[test]
   fn test_z80n() {
-    let _ = Z80N::new();
+    let _ = Cpu::new();
   }
 }
