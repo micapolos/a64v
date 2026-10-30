@@ -3,12 +3,24 @@ use crate::{
   bit::Bit,
   bits,
   z80n::{
-    cpu::{IO, Z80N},
+    cpu::Z80N,
     op,
     reg::{R, RR},
     value::{h, hl, l},
   },
 };
+
+pub trait IO {
+  fn read(&self, _address: u16) -> u8 {
+    0
+  }
+  fn write(&mut self, _address: u16, _value: u8) {}
+  fn input(&self, _address: u16) -> u8 {
+    0
+  }
+  fn output(&mut self, _address: u16, _value: u8) {}
+  fn halt(&mut self, _z80n: &mut Z80N) {}
+}
 
 pub struct Emulator<IOImpl: IO> {
   pub z80n: Z80N,

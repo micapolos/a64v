@@ -34,18 +34,6 @@ impl Z80N {
   }
 }
 
-pub trait IO {
-  fn read(&self, _address: u16) -> u8 {
-    0
-  }
-  fn write(&mut self, _address: u16, _value: u8) {}
-  fn input(&self, _address: u16) -> u8 {
-    0
-  }
-  fn output(&mut self, _address: u16, _value: u8) {}
-  fn halt(&mut self, _z80n: &mut Z80N) {}
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
