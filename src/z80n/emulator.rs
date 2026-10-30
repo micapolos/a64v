@@ -194,10 +194,7 @@ impl<IOImpl: IO> Emulator<IOImpl> {
 
 #[cfg(test)]
 mod tests {
-  use {
-    super::*,
-    crate::z80n::{op::Op, reg::Regs},
-  };
+  use {super::*, crate::z80n::op::Op};
 
   struct TestIO {
     pub mem: [u8; 0x10000],
@@ -228,11 +225,6 @@ mod tests {
         z80n.is_halted = false;
       }
     }
-  }
-
-  #[test]
-  fn test_z80n() {
-    let _ = Z80N::new();
   }
 
   #[test]

@@ -45,3 +45,13 @@ pub trait IO {
   fn output(&mut self, _address: u16, _value: u8) {}
   fn halt(&mut self, _z80n: &mut Z80N) {}
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_z80n() {
+    let _ = Z80N::new();
+  }
+}
